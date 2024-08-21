@@ -1,13 +1,13 @@
 <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary border-bottom border-body">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">InvestEd</a>
+        <a class="navbar-brand" href="index.html">InvestEd</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="nav nav-pills">
+            <ul class="nav nav-pills me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="index.html">Dashboard</a>
+                    <a class="nav-link active" aria-current="page" href="index.html">Dashboard</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="browse.html">Browse</a>
@@ -23,28 +23,3 @@
         </div>
     </div>
 </nav>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // Get the current URL path (e.g., '/index.html', '/about.html')
-      const currentPath = window.location.pathname;
-  
-      // Get all nav links
-      const navLinks = document.querySelectorAll('.nav-link');
-  
-      // Loop through each link and compare the href with the current path
-      navLinks.forEach(link => {
-        // Check if the href of the link matches the current URL path
-        if (link.getAttribute('href') === currentPath) {
-          // Add 'active' class and aria-current="page" to the active link
-          link.classList.add('active');
-          link.setAttribute('aria-current', 'page');
-        } else {
-          // Remove 'active' class and aria-current from inactive links
-          link.classList.remove('active');
-          link.removeAttribute('aria-current');
-        }
-      });
-    });
-  </script>
-  
