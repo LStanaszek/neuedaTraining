@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS Watchlist (
     FOREIGN KEY(stock_id) REFERENCES Stock(stock_id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Portfolio (
+CREATE TABLE IF NOT EXISTS Transactions (
 	trade_id INTEGER AUTO_INCREMENT PRIMARY KEY,
     trade_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     stock_id INTEGER,
@@ -29,7 +29,13 @@ CREATE TABLE IF NOT EXISTS Portfolio (
     FOREIGN KEY(stock_id) REFERENCES Stock(stock_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS Users (
+	user_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    fname VARCHAR(255),
+    cash INTEGER
+);
+
 /*######################### Drop Tables #####################*/
--- DROP TABLE IF EXISTS Stock;
 -- DROP TABLE IF EXISTS Watchlist;
--- DROP TABLE IF EXISTS Portfolio;
+-- DROP TABLE IF EXISTS Transactions;
+-- DROP TABLE IF EXISTS Stock;
