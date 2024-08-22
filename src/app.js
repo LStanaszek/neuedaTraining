@@ -11,9 +11,12 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 //const browseRoutes = require('./routes/sectorRoutes');
+const browseRoutes = require('./routes/BrowseAPI');
 
 // Use routes
 //app.use('/sectors', sectorRoutes);
+app.use('/browse', browseRoutes);
+
 
 sequelize.authenticate()
     .then(() => {
