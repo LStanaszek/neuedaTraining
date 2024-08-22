@@ -10,10 +10,10 @@ app.use(express.json());
 //app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
-//const browseRoutes = require('./routes/sectorRoutes');
+const browseRoutes = require('./routes/DashboardAPI');
 
 // Use routes
-//app.use('/sectors', sectorRoutes);
+app.use('/Dashboard', browseRoutes);
 
 sequelize.authenticate()
     .then(() => {
