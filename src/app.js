@@ -1,6 +1,5 @@
 const express = require('express');
 //require("dotenv").config();
-const axios = require("axios");
 const bodyParser = require("body-parser");
 const {sequelize, Sector, Stock, Watchlist, User, Transaction} = require('./utils/createDB');
 const app = express();
@@ -22,17 +21,6 @@ sequelize.authenticate()
     .catch((err) => {
         console.error('Failed to connect:', err);
     });
-
-    /* Test Query
-app.get('/', async (req, res) => {
-        try {
-          const watchlist = await Watchlist.findAll();
-          res.json(watchlist);
-        } catch (error) {
-          res.status(500).json({ error: 'An error occurred while fetching sectors.' });
-        }
-      });
-    */
 
 app.listen(PORT, () => {
     console.log(`Server Running on localhost//:${PORT}`)
