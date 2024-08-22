@@ -24,8 +24,6 @@ async function getCurrentStockPrice(ticker) {
         var api_key = finnhub.ApiClient.instance.authentications['api_key'];
         api_key.apiKey = process.env.FINNHUB_API_KEY;
         const finnhubClient = new finnhub.DefaultApi()
-        var flag = false;
-        var latestPrice;
 
         return new Promise((resolve, reject) => {
             finnhubClient.quote(ticker, (error, data, response) => {
@@ -56,8 +54,6 @@ async function getTotalValuation() {
             },
         ],
         });
-
-        console.log(transactions);
   
         let totalValue = 0;
 
@@ -66,11 +62,11 @@ async function getTotalValuation() {
             const { share_quantity, Stock } = transaction;
             const { ticker } = Stock;
             const stockPrice = await getCurrentStockPrice(ticker);
-            console.log(`price : ${stockPrice}`);
+            //console.log(`price : ${stockPrice}`);
             totalValue += stockPrice * share_quantity;
         }
 
-        console.log('Total Value:', totalValue);
+        //console.log('Total Value:', totalValue);
         return totalValue;
     } 
     catch (error) {
