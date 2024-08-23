@@ -15,7 +15,7 @@ const browseRoutes = require('./routes/BrowseAPI');
 
 // Use routes
 //app.use('/sectors', sectorRoutes);
-app.use('/browse', browseRoutes);
+app.use('/Browse', browseRoutes);
 
 
 sequelize.authenticate()
