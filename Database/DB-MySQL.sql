@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS watchlist (
 CREATE TABLE IF NOT EXISTS users (
 	user_id INTEGER AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
-    balance DECIMAL(10, 4) NOT NULL
+    balance DECIMAL(10, 2) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     trade_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     stock_id INTEGER NOT NULL,
     share_quantity INTEGER NOT NULL,
-    stock_price DECIMAL(10, 4) NOT NULL,
+    stock_price DECIMAL(10, 2) NOT NULL,
     user_id INTEGER NOT NULL,
     FOREIGN KEY(stock_id) REFERENCES stocks(stock_id) ON DELETE CASCADE,
     FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -77,10 +77,10 @@ VALUES
 INSERT INTO transactions (stock_id, share_quantity, stock_price, user_id)
 VALUES 
 (1, 100, 150.50, 1),
-(1, -50, 220.30, 2),
-(3, 200, 38.75, 3),
+(1, -50, 220.30, 1),
+(3, 200, 38.75, 1),
 (4, 150, 125.00, 1),
-(3, 80, 56.60, 2);
+(3, 80, 56.60, 1);
 
 /*######################### Drop Tables #####################*/
 -- DROP TABLE IF EXISTS Watchlist;

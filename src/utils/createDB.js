@@ -47,7 +47,7 @@ Watchlist.belongsTo(Stock, { foreignKey: 'stock_id' });
 const User = sequelize.define('User', {
     user_id : {type: DataTypes.INTEGER, autoIncrement:true, allowNull:false, primaryKey:true},
     username : {type: DataTypes.STRING, allowNull:false},
-    balance : {type: DataTypes.DECIMAL(10,4), allowNull:false},
+    balance : {type: DataTypes.DECIMAL(10,2), allowNull:false},
     }, {
     tableName:'users',
     timestamps:false
@@ -58,7 +58,7 @@ const Transaction = sequelize.define('Transaction', {
     trade_timestamp: {type: DataTypes.DATE, defaultValue: DataTypes.NOW, allowNull: false,},
     stock_id: {type: DataTypes.INTEGER, allowNull: false, references: { model: Stock, key: 'stock_id',}, onDelete: 'CASCADE',},
     share_quantity: {type: DataTypes.INTEGER, allowNull: false,},
-    stock_price: {type: DataTypes.DECIMAL(10, 4), allowNull: false,},
+    stock_price: {type: DataTypes.DECIMAL(10, 2), allowNull: false,},
     user_id: {type: DataTypes.INTEGER, allowNull: false, references: { model: User, key: 'user_id',}, onDelete: 'CASCADE', },
   } , {
     tableName:'transactions',
