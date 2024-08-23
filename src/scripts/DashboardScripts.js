@@ -83,7 +83,7 @@ async function getAllStocks(userId, date)
             attributes: [
                 'stock_id',
                 // Use Sequelize's raw query to cast the SUM result to a number directly
-                [sequelize.literal('CAST(SUM(share_quantity) AS UNSIGNED)'), 'totalShares']
+                [sequelize.literal('SUM(share_quantity)'), 'totalShares']
             ],
             where: {
                 user_id: userId,
