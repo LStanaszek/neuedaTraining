@@ -9,7 +9,9 @@ app.use(express.json());
 //app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
-
+const browseRoutes = require('./routes/DashboardAPI');
+const stockInfo = require('/Users/Administrator/Documents/neuedaTraining/src/routes/StockInfoAPI');
+const search = require('/Users/Administrator/Documents/neuedaTraining/src/routes/StockInfoAPI');
 //const browseRoutes = require('./routes/sectorRoutes');
 const dashboardRoutes = require('./routes/DashboardAPI');
 const browseRoutes = require('./routes/BrowseAPI');
@@ -18,7 +20,8 @@ const browseRoutes = require('./routes/BrowseAPI');
 //app.use('/sectors', sectorRoutes);
 app.use('/Dashboard', dashboardRoutes);
 app.use('/Browse', browseRoutes);
-
+app.use('/Stockinfo', stockInfo);
+app.use('/SearchSuggestion', search);
 
 sequelize.authenticate()
     .then(() => {
