@@ -73,6 +73,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Owned Stocks List -->
+        <div class="container mt-4 mb-4">
+            <div class="card">
+                <h5 class="card-header">Owned Stocks</h5>
+                <div class="card-body">
+
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col" class="text-center">Company Name</th>
+                            <th scope="col" class="text-center">Symbol</th>
+                            <th scope="col" class="text-center">Shares Owned</th>
+                            <th scope="col" class="text-center">Current Price</th>
+                            <th scope="col" class="text-center">Total Value</th>
+                            <th scope="col" class="text-center"></th>
+                          </tr>
+                        </thead>
+                        <tbody id = "stockTable">
+                        </tbody>
+                      </table>
+
+
+                  <a href="#" class="btn btn-primary" id="viewAllStock">View All</a>
+                </div>
+              </div>
+        </div>
         
             
 
@@ -105,7 +132,7 @@
 
         <!-- FETCH PERFORMANCE STATS -->
         <script>
-            fetch('http://localhost:3000/Dashboard/PerformanceIndicators')
+            fetch('./Dashboard/PerformanceIndicators')
                 .then(response => response.json())
                 .then(data => {
                     // Update performance indicators
@@ -204,6 +231,73 @@
                 updateChart(selectedTimeframe);
             });
         </script>
+
+        
+        <!-- OWNED STOCKS LIST -->
+        <script>
+            const stockData = [
+                ["Apple", "AAPL", 10, 1323, 13230],
+                ["Microsoft", "MSFT", 20, 5000, 100000],
+                ["Amazon", "AMZN", 50, 1000, 50000],
+                ["Google", "GOOGL", 15, 2500, 37500],
+                ["Tesla", "TSLA", 30, 2000, 60000],
+                ["Facebook", "META", 40, 500, 20000],  
+                ["Netflix", "NFLX", 25, 3000, 75000],
+                ["Nvidia", "NVDA", 35, 1500, 52500]
+            ];
+        
+            document.addEventListener("DOMContentLoaded", function () {
+                const maxVisibleStocks = 3;
+                const stockTableBody = document.getElementById("stockTable");
+                const viewAllBtn = document.getElementById("viewAllStock");
+                let showingAll = false;
+        
+                function renderTable(stockData, showAll = false) {
+                    stockTableBody.innerHTML = "";  
+        
+                    const stocksToShow = showAll ? stockData.length : maxVisibleStocks;
+
+                    if (stockData.length === 0) {
+                        const row = `
+                            <tr>
+                                <th colspan="6" class="text-center">No Stocks Owned</th>
+                            </tr>
+                        `;
+                        stockTableBody.insertAdjacentHTML('beforeend', row);
+                    }
+        
+                    for (let i = 0; i < stocksToShow; i++) {
+                        const stock = stockData[i];
+                        const row = `
+                            <tr>
+                                <td scope="row" class="text-center">${stock[0]}</td>
+                                <th class="text-center">${stock[1]}</th>
+                                <td class="text-center">${stock[2]}</td>
+                                <td class="text-center">${stock[3]}</td>
+                                <td class="text-center">${stock[4]}</td>
+                                <td class="text-center"><a href="#" class="btn btn-primary">Details</a></td>
+                            </tr>
+                        `;
+                        stockTableBody.insertAdjacentHTML('beforeend', row);
+                    }
+
+                    viewAllBtn.textContent = showAll ? "View Less" : "View All";
+                }
+
+                if (stockData.length <= maxVisibleStocks) {
+                    viewAllBtn.style.display = 'none';
+                }
+        
+                renderTable(stockData, showingAll);
+        
+                viewAllBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    showingAll = !showingAll;
+                    renderTable(stockData, showingAll);
+                });
+            });
+        </script>
+        
 
 
         <!-- BOOTSTRAP SCRIPT -->
