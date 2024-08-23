@@ -70,7 +70,7 @@ async function getWatchlist() {
         console.error('BrowseScripts: Error fetching watchlist data:', error);
         throw error;
     }
-}
+};
 
 async function deleteStockFromWatchlist(watchID){
     try {
@@ -84,10 +84,42 @@ async function deleteStockFromWatchlist(watchID){
         console.error(`BrowseScripts: Error deleting watchID: ${watchID}`, error);
         throw error;
     }
-}
+};
+
+async function addStockToWatchlist(stockID) {
+    try {
+        const existsInWL = await Watchlist.findOne({
+            where: {
+                stock_id: stockID,
+            },
+        });
+
+        if (existsInWL) {
+            return { message: "Stock is already in the watchlist" };
+        }
+
+        // Check if valid stockID in the Stock table
+        const stock = await Stock.findByPk(stockID);
+        if (!stock) {
+            return { message: "Invalid stockID provided." };
+        }
+
+        // Add stock to the watchlist
+        const stockAddedInWL = await Watchlist.create({
+            stock_id: stockID,
+        });
+        console.log(stockAddedInWL);
+        return stockAddedInWL;
+    } catch (error) {
+        console.error('BrowseScripts: Error adding stock to watchlist:', error);
+        throw error;
+    }
+};
+
 
 module.exports = {
     getStockPriceData,
     getWatchlist,
-    deleteStockFromWatchlist
+    deleteStockFromWatchlist,
+    addStockToWatchlist
 };
