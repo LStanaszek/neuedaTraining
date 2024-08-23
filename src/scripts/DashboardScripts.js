@@ -75,27 +75,31 @@ async function getTotalValuation() {
     }
 }
 
-async function getAllStocks(userId, date)
+//multi purpose:
+// - get all upto-date stocks
+// - get all stocks upto specific date
+async function getAllStocks(userId, date, flag)
 {
     try {
         // Fetch sum of shares owned per stock up to the input date
         const holdings = await Transaction.findAll({
             attributes: [
                 'stock_id',
-                // Use Sequelize's raw query to cast the SUM result to a number directly
-                [sequelize.literal('SUM(share_quantity)'), 'totalShares']
+                [sequelize.fn('SUM', sequelize.col('share_quantity')), 'totalShares']
             ],
             where: {
                 user_id: userId,
-                trade_timestamp: { [Op.lte]: new Date(date) } // Up to the specified date
+                trade_timestamp: { [Op.lte]: new Date(date) } // Up to today
             },
             include: [
                 {
                     model: Stock,
                     attributes: ['ticker', 'stock_name'], // Include stock details
+                    required: true, // Perform an INNER JOIN
                 }
             ],
-            group: ['stock_id'], // Group by stock_id and stock details
+            group: ['stock_id'], // Group by stock_id
+            having: sequelize.literal('SUM(share_quantity) > 0') // Exclude stocks where totalShares is 0
         });
 
         //console.log(holdings);
@@ -106,8 +110,17 @@ async function getAllStocks(userId, date)
             const { ticker, stock_name } = Stock;
             const totalShares = holding.get('totalShares');
 
-            // Get the current price from Finnhub
-            const currentPrice = await getCurrentStockPrice(ticker);
+            var currentPrice;
+
+            
+            if (flag === 0) {
+                // Get the current price from Finnhub
+                currentPrice = await getCurrentStockPrice(ticker);
+            }
+            else
+            {
+                currentPrice = getStockPriceData(ticker, interval = "1d", date, date)
+            }
 
             // Calculate the total market value
             const marketValue = currentPrice * parseInt(totalShares);
@@ -131,9 +144,30 @@ async function getAllStocks(userId, date)
 
 }
 
+async function getDates(timeframe) {
+    const end = new Date().toISOString().split('T')[0];
+    const startTemp = new Date();
+    let start;
+
+    if (timeframe == 0) {
+        startTemp.setDate(startTemp.getDate() - 7);
+    } else if (timeframe == 1) {
+        startTemp.setMonth(startTemp.getMonth() - 1);
+    } else if (timeframe == 2) {
+        startTemp.setMonth(startTemp.getMonth() - 6);
+    } else {
+        startTemp.setFullYear(startTemp.getFullYear() - 1);
+    }
+
+    start = startTemp.toISOString().split('T')[0];
+
+    return start;
+}
+
 module.exports = {
     getTotalInvestment,
     getTotalValuation,
-    getAllStocks
+    getAllStocks,
+    getDates
 }
 

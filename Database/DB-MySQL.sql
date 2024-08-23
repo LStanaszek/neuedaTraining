@@ -74,15 +74,16 @@ VALUES
 ('jane_smith', 150000.0000),
 ('alice_jones', 75000.0000);
 
-INSERT INTO transactions (stock_id, share_quantity, stock_price, user_id)
+INSERT INTO transactions (stock_id, trade_timestamp, share_quantity, stock_price, user_id)
 VALUES 
-(1, 100, 150.50, 1),
-(1, -50, 220.30, 1),
-(3, 200, 38.75, 1),
-(4, 150, 125.00, 1),
-(3, 80, 56.60, 1);
 
-/*######################### Drop Tables #####################*/
+(1, '2024-08-23',  -50, 220.30, 1),
+(1, '2024-08-22', 100, 150.50, 1),
+(3, '2024-08-21',  200, 38.75, 1),
+(4, '2024-08-20',  150, 125.00, 1),
+(3, '2024-08-19',  80, 56.60, 1);
+
+ /*######################### Drop Tables #####################*/
 -- DROP TABLE IF EXISTS Watchlist;
 -- DROP TABLE IF EXISTS Transactions;
 -- DROP TABLE IF EXISTS Stock;
