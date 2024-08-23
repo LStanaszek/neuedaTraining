@@ -9,9 +9,9 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
-const browseRoutes = require('./routes/DashboardAPI');
-const stockInfo = require('/Users/Administrator/Documents/neuedaTraining/src/routes/StockInfoAPI');
-const search = require('/Users/Administrator/Documents/neuedaTraining/src/routes/StockInfoAPI');
+
+const stockInfo = require('./routes/StockInfoAPI');
+const search = require('./routes/StockInfoAPI');
 //const browseRoutes = require('./routes/sectorRoutes');
 const dashboardRoutes = require('./routes/DashboardAPI');
 const browseRoutes = require('./routes/BrowseAPI');
