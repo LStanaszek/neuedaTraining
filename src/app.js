@@ -1,12 +1,12 @@
 const express = require('express');
-//require("dotenv").config();
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const {sequelize, Sector, Stock, Watchlist, User, Transaction} = require('./utils/createDB');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-//app.use(express.static("public"));
+app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
 const dashboardRoutes = require('./routes/DashboardAPI');

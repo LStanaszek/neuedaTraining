@@ -12,7 +12,7 @@ async function getTotalInvestment() {
         });
   
         console.log('Total Value:', result.get('totalValue'));
-        return result.get('totalValue');
+        return parseFloat(result.get('totalValue')).toFixed(2);
     } 
     catch (error) {
         console.error('Error fetching sum of product:', error);
@@ -67,7 +67,7 @@ async function getTotalValuation() {
         }
 
         //console.log('Total Value:', totalValue);
-        return totalValue;
+        return parseFloat(totalValue).toFixed(2);
     } 
     catch (error) {
         console.error('Error fetching sum of product:', error);

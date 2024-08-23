@@ -18,27 +18,35 @@
         <!-- PERFORMANCE INDICATORS -->
         <div class="container mt-4">
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6 col-sm-8">
+                <div class="col-lg-3 col-md-6">
                     <div class="card">
                         <div class="card-body text-center">
                             <h6 class="card-title mb-3">Total Investment</h6>
-                            <p class="card-text fs-3 fw-bold">$11,245</p>
+                            <p class="card-text fs-3 fw-bold" id="totalInvestment">$0</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 col-sm-8">
+                <div class="col-lg-3 col-md-6">
                     <div class="card">
                         <div class="card-body text-center">
                             <h6 class="card-title mb-3">Portfolio Value</h6>
-                            <p class="card-text fs-3 fw-bold">$13,124</p>
+                            <p class="card-text fs-3 fw-bold" id="totalValue">$0</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 col-sm-8">
+                <div class="col-lg-3 col-md-6">
                     <div class="card">
                         <div class="card-body text-center">
                             <h6 class="card-title mb-3">Total Growth</h6>
-                            <p class="card-text fs-3 fw-bold">16.71%</p>
+                            <p class="card-text fs-3 fw-bold" id="totalGrowth">$0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h6 class="card-title mb-3">Growth Percentage</h6>
+                            <p class="card-text fs-3 fw-bold" id="growthPercentage">0%</p>
                         </div>
                     </div>
                 </div>
@@ -76,7 +84,10 @@
                     document.getElementById('navbar').innerHTML = data;
 
                     // HIGHLIGHT ACTIVE BUTTON
-                    const currentPath = window.location.pathname.split('/').pop();
+                    let currentPath = window.location.pathname.split('/').pop();
+                    if (currentPath === '') {
+                        currentPath = 'index.html';
+                    }
 
                     const navLinks = document.querySelectorAll('.nav-link');
                     navLinks.forEach(link => {
@@ -89,6 +100,21 @@
                         }
                     });
                 });
+        </script>
+
+
+        <!-- FETCH PERFORMANCE STATS -->
+        <script>
+            fetch('http://localhost:3000/Dashboard/PerformanceIndicators')
+                .then(response => response.json())
+                .then(data => {
+                    // Update performance indicators
+                    document.getElementById('totalInvestment').textContent = `$${data.moneyIn.toLocaleString()}`;
+                    document.getElementById('totalValue').textContent = `$${data.valuation.toLocaleString()}`;
+                    document.getElementById('totalGrowth').textContent = `$${data.growthAbsolute.toLocaleString()}`;
+                    document.getElementById('growthPercentage').textContent = `${data.growthPercent.toLocaleString()}%`;
+                })
+                .catch(error => console.error('Error fetching performance data:', error));
         </script>
 
 
@@ -178,6 +204,7 @@
                 updateChart(selectedTimeframe);
             });
         </script>
+
 
         <!-- BOOTSTRAP SCRIPT -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>      
