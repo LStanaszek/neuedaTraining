@@ -1,3 +1,4 @@
+<!-- public/browse.html -->
 <!DOCTYPE html>
 <html> 
     <head>
@@ -33,6 +34,62 @@
                         }
                     });
                 });
+                // Fetch and display the watchlist
+            fetch('http://localhost:3000/Browse/watchlist')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    const watchlistItems = document.getElementById('watchlistItems');
+                    const additionalWatchlistItems = document.getElementById('additionalWatchlistItems');
+
+                    data.forEach((item, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+
+                        listItem.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span>${item.name} (${item.ticker})</span>
+                                    <span class="badge bg-primary badge-pill ms-2">$${item.current_price}</span>
+                                    <span class="badge bg-secondary ms-2">${item.growth_today}%</span>
+                                </div>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary me-2">View Detail</button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
+                                </div>
+                            </div>
+                        `;
+
+                        // Display the first 3 items by default, and the rest in the collapsible section
+                        if (index < 3) {
+                            watchlistItems.appendChild(listItem);
+                        } else {
+                            additionalWatchlistItems.appendChild(listItem);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching watchlist:', error);
+                });
+
+            // Function to remove a stock from the watchlist
+            function removeFromWatchlist(watchID, buttonElement) {
+                fetch(`http://localhost:3000/Browse/watchlist/delete?watchID=${watchID}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Remove the item from the UI
+                        const listItem = buttonElement.closest('.list-group-item');
+                        listItem.remove();
+                    } else {
+                        console.error('Failed to remove stock from watchlist');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing stock from watchlist:', error);
+                });
+            }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>      
     
@@ -41,79 +98,29 @@
 
 
     
-        <div class="container mt-4 d-flex justify-content-center">
-            <div class="col-lg-6 col-md-8 col-sm-12">
-                <!-- Watchlist Section -->
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4>Watchlist</h4>
-                        <div>
-                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#watchlistCollapse" aria-expanded="false" aria-controls="watchlistCollapse">
-                                View All
-                            </button>
-                        </div>
+        <!-- Watchlist Section -->
+    <div class="container mt-4 d-flex justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Watchlist</h4>
+                    <div>
+                        <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#watchlistCollapse" aria-expanded="false" aria-controls="watchlistCollapse">
+                            View All
+                        </button>
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <!-- Top 3 items displayed by default -->
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span>Apple Inc. (AAPL)</span>
-                                    <span class="badge bg-primary badge-pill ms-2">$150.75</span>
-                                </div>
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-primary me-2">View Detail</button>
-                                    <button class="btn btn-sm btn-outline-danger">Remove</button>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span>Tesla Inc. (TSLA)</span>
-                                    <span class="badge bg-primary badge-pill">$675.50</span>
-                                </div>
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-primary me-2">View Detail</button>
-                                    <button class="btn btn-sm btn-outline-danger">Remove</button>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span>Amazon.com Inc. (AMZN)</span>
-                                    <span class="badge bg-primary badge-pill">$3,212.90</span>
-                                </div>
-                                <div class="'mt-2">
-                                <button class="btn btn-sm btn-outline-primary me-2">View Detail</button>
-                                <button class="btn btn-sm btn-outline-danger">Remove</button>
-                                </div>
-                            </div>
-                        </li>
+                </div>
+                <ul class="list-group list-group-flush" id="watchlistItems">
+                    <!-- Watchlist items will be populated here dynamically -->
+                </ul>
+                <div id="watchlistCollapse" class="collapse">
+                    <ul class="list-group list-group-flush" id="additionalWatchlistItems">
+                        <!-- Additional watchlist items will be populated here dynamically -->
                     </ul>
-                    <!-- Collapse for additional items -->
-                    <div id="watchlistCollapse" class="collapse">
-                        <ul class="list-group list-group-flush">
-                            <!-- Additional items hidden by default  -->
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span>Alphabet Inc. (GOOGL)</span>
-                                        <span class="badge bg-primary badge-pill">$2,834.50</span>
-                                    </div>
-                                    <div class="mt-2">
-                                        <button class="btn btn-sm btn-outline-primary me-2">View Detail</button>
-                                        <button class="btn btn-sm btn-outline-danger">Remove</button>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- Add more items as needed -->
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
+    </div>
     
         <!-- Bootstrap JS (necessary for collapse) -->
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

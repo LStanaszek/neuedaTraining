@@ -1,5 +1,6 @@
 const express = require('express');
 require("dotenv").config();
+const cors = require('cors');
 const bodyParser = require("body-parser");
 const {sequelize, Sector, Stock, Watchlist, User, Transaction} = require('./utils/createDB');
 const app = express();
@@ -8,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
+app.use(cors());
 
 
 const stockInfo = require('./routes/StockInfoAPI');
