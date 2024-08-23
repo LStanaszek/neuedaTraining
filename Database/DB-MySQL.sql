@@ -77,10 +77,10 @@ VALUES
 INSERT INTO transactions (stock_id, share_quantity, stock_price, user_id)
 VALUES 
 (1, 100, 150.50, 1),
-(1, -50, 220.30, 2),
-(3, 200, 38.75, 3),
+(1, -50, 220.30, 1),
+(3, 200, 38.75, 1),
 (4, 150, 125.00, 1),
-(3, 80, 56.60, 2);
+(3, 80, 56.60, 1);
 
 /*######################### Drop Tables #####################*/
 -- DROP TABLE IF EXISTS Watchlist;
