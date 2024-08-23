@@ -37,6 +37,42 @@ async function getStockPriceData(ticker, interval, start, end) {
     }
 };
 
+async function getWatchlistWithPrices() {
+    try {
+        const watchlist = await Watchlist.findAll({
+            include: [
+                {
+                    model: Stock,
+                    required: true,
+                },
+            ],
+        });
+
+        // Loop through watchlist items to fetch current price and growth
+        const watchlistWithPrices = await Promise.all(watchlist.map(async (item) => {
+            const { ticker } = item.Stock;
+            const stockData = await yahooFinance.quote(ticker);
+            const currentPrice = stockData.regularMarketPrice;
+            const previousClose = stockData.regularMarketPreviousClose;
+            const growthToday = ((currentPrice - previousClose) / previousClose) * 100;
+
+            return {
+                id: item.watch_id,
+                name: item.Stock.stock_name,
+                ticker: item.Stock.ticker,
+                current_price: currentPrice,
+                growth_today: growthToday.toFixed(2),
+            };
+        }));
+
+        return watchlistWithPrices;
+    } catch (error) {
+        console.error('BrowseScripts: Error fetching watchlist data:', error);
+        throw error;
+    }
+}
+
 module.exports = {
-    getStockPriceData
+    getStockPriceData,
+    getWatchlistWithPrices
 };
