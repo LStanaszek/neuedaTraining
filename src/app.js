@@ -10,9 +10,15 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 const browseRoutes = require('./routes/DashboardAPI');
+const stockInfo = require('/Users/Administrator/Documents/neuedaTraining/src/routes/StockInfoAPI');
+const search = require('/Users/Administrator/Documents/neuedaTraining/src/routes/StockInfoAPI');
 
 // Use routes
 app.use('/Dashboard', browseRoutes);
+
+app.use('/Stockinfo', stockInfo);
+
+app.use('/SearchSuggestion', search);
 
 sequelize.authenticate()
     .then(() => {
