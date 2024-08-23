@@ -104,11 +104,9 @@ async function addStockToWatchlist(stockID) {
             return { message: "Invalid stockID provided." };
         }
 
-        // Add stock to the watchlist
         const stockAddedInWL = await Watchlist.create({
             stock_id: stockID,
         });
-        console.log(stockAddedInWL);
         return stockAddedInWL;
     } catch (error) {
         console.error('BrowseScripts: Error adding stock to watchlist:', error);
