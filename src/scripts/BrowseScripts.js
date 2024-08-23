@@ -37,7 +37,7 @@ async function getStockPriceData(ticker, interval, start, end) {
     }
 };
 
-async function getWatchlistWithPrices() {
+async function getWatchlist() {
     try {
         const watchlist = await Watchlist.findAll({
             include: [
@@ -72,7 +72,22 @@ async function getWatchlistWithPrices() {
     }
 }
 
+async function deleteStockFromWatchlist(watchID){
+    try {
+        await Watchlist.destroy({
+            where: {
+                watch_id: watchID,
+            },
+        });
+        return;
+    } catch (error) {
+        console.error(`BrowseScripts: Error deleting watchID: ${watchID}`, error);
+        throw error;
+    }
+}
+
 module.exports = {
     getStockPriceData,
-    getWatchlistWithPrices
+    getWatchlist,
+    deleteStockFromWatchlist
 };

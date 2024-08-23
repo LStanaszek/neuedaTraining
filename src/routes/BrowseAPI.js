@@ -3,7 +3,7 @@ const express = require('express');
 require('dotenv').config();
 const yahooFinance = require('yahoo-finance2').default;
 const { Watchlist, Stock } = require('../utils/createDB');
-const { getStockPriceData, getWatchlistWithPrices } = require('../scripts/BrowseScripts');
+const { getStockPriceData, getWatchlist, deleteStockFromWatchlist } = require('../scripts/BrowseScripts');
 
 const router = express.Router();
 
@@ -26,11 +26,33 @@ router.get('/Historical', async (req, res) => {
 // GET list of stocks in Watchlist table
 router.get('/watchlist', async (req, res) => {
     try {
-        const watchlistWithPrices = await getWatchlistWithPrices();
-        res.json(watchlistWithPrices);
+        const watchlist = await getWatchlist();
+        res.json(watchlist);
     } catch (error) {
         console.error('Error fetching watchlist:', error);
         res.status(500).json({ error: 'An error occurred while fetching the watchlist.' });
+    }
+});
+
+router.delete('/watchlist-delete', async (req, res) => {
+    try {
+        const watchID = req.query.watchID
+        await deleteStockFromWatchlist(watchID);
+        res.status(200).json({message: `Successfully deleted WatchID: ${watchID}`});
+    } catch (error) {
+        console.error('Error deleting stock from watchlist:', error);
+        res.status(500).json({ error: 'An error occurred while deleting stock from watchlist.' });
+    }
+});
+
+router.delete('/watchlist-delete', async (req, res) => {
+    try {
+        const watchID = req.query.watchID
+        await deleteStockFromWatchlist(watchID);
+        res.status(200).json({message: `Successfully deleted WatchID: ${watchID}`});
+    } catch (error) {
+        console.error('Error deleting stock from watchlist:', error);
+        res.status(500).json({ error: 'An error occurred while deleting stock from watchlist.' });
     }
 });
 
