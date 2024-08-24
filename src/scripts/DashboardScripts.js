@@ -211,4 +211,3 @@ module.exports = {
     WithdrawFundsUser,
     getAllStocks
 }
-
