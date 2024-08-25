@@ -14,6 +14,7 @@ const search = require('./routes/StockInfoAPI');
 //const browseRoutes = require('./routes/sectorRoutes');
 const dashboardRoutes = require('./routes/DashboardAPI');
 const browseRoutes = require('./routes/BrowseAPI');
+const checkoutRoutes = require('./routes/CheckoutAPI');
 
 // Use routes
 //app.use('/sectors', sectorRoutes);
@@ -21,6 +22,7 @@ app.use('/Dashboard', dashboardRoutes);
 app.use('/Browse', browseRoutes);
 app.use('/Stockinfo', stockInfo);
 app.use('/SearchSuggestion', search);
+app.use('/Checkout', checkoutRoutes);
 
 sequelize.authenticate()
     .then(() => {
