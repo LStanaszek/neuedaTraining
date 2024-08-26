@@ -73,6 +73,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Owned Stocks List -->
+        <div class="container mt-4 mb-4">
+            <div class="card">
+                <h5 class="card-header">Owned Stocks</h5>
+                <div class="card-body">
+
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col" class="text-center">Company Name</th>
+                            <th scope="col" class="text-center">Symbol</th>
+                            <th scope="col" class="text-center">Shares Owned</th>
+                            <th scope="col" class="text-center">Current Price</th>
+                            <th scope="col" class="text-center">Total Value</th>
+                            <th scope="col" class="text-center"></th>
+                          </tr>
+                        </thead>
+                        <tbody id = "stockTable">
+                        </tbody>
+                      </table>
+
+
+                  <a href="#" class="btn btn-primary" id="viewAllStock">View All</a>
+                </div>
+              </div>
+        </div>
         
             
 
@@ -105,7 +132,7 @@
 
         <!-- FETCH PERFORMANCE STATS -->
         <script>
-            fetch('http://localhost:3000/Dashboard/PerformanceIndicators')
+            fetch('./Dashboard/PerformanceIndicators')
                 .then(response => response.json())
                 .then(data => {
                     // Update performance indicators
@@ -204,6 +231,76 @@
                 updateChart(selectedTimeframe);
             });
         </script>
+
+        
+        <!-- OWNED STOCKS LIST -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const maxVisibleStocks = 3;
+                const stockTableBody = document.getElementById("stockTable");
+                const viewAllBtn = document.getElementById("viewAllStock");
+                let showingAll = false;
+        
+                const userId = "1"; 
+                const date = "2024-08-26"; 
+        
+                function renderTable(stocks, showAll = false) {
+                    stockTableBody.innerHTML = "";
+                    const stocksToShow = showAll ? stocks.length : Math.min(stocks.length, maxVisibleStocks);
+        
+                    if (stocks.length === 0) {
+                        const row = `
+                            <tr>
+                                <th colspan="6" class="text-center">No Stocks Owned</th>
+                            </tr>
+                        `;
+                        stockTableBody.insertAdjacentHTML('beforeend', row);
+                        viewAllBtn.style.display = 'none';
+                        return;
+                    }
+        
+                    for (let i = 0; i < stocksToShow; i++) {
+                        const stock = stocks[i];
+                        const row = `
+                            <tr>
+                                <td scope="row" class="text-center">${stock.stock_name}</td>
+                                <th class="text-center">${stock.ticker}</th>
+                                <td class="text-center">${stock.totalShares}</td>
+                                <td class="text-center">${stock.currentPrice}</td>
+                                <td class="text-center">${stock.marketValue}</td>
+                                <td class="text-center"><a href="#" class="btn btn-primary">Details</a></td>
+                            </tr>
+                        `;
+                        stockTableBody.insertAdjacentHTML('beforeend', row);
+                    }
+        
+                    viewAllBtn.textContent = showAll ? "View Less" : "View All";
+                    viewAllBtn.style.display = stocks.length <= maxVisibleStocks ? 'none' : 'block';
+                }
+        
+                fetch(`./Dashboard/GetAll?userId=${userId}&date=${date}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        stockData = data;
+                        renderTable(stockData.stocks);
+                    })
+                    .catch(error => console.error('Error fetching performance data:', error));
+        
+                viewAllBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    showingAll = !showingAll;
+                    renderTable(stockData.stocks, showingAll);
+                });
+            });
+        </script>
+        
+        
+        
+        
 
 
         <!-- BOOTSTRAP SCRIPT -->
