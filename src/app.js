@@ -9,7 +9,6 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:true}));
 
-
 const stockInfo = require('./routes/StockInfoAPI');
 const search = require('./routes/StockInfoAPI');
 //const browseRoutes = require('./routes/sectorRoutes');

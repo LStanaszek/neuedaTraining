@@ -75,10 +75,80 @@ async function getTotalValuation() {
     }
 }
 
-//multi purpose:
-// - get all upto-date stocks
-// - get all stocks upto specific date
-async function getAllStocks(userId, date, flag)
+/**
+ * Adds funds to a user's balance.
+ * @param {number} userId - The ID of the user.
+ * @param {number} amount - The amount to add to the user's balance.
+ * @returns {Promise<object>} - A promise that resolves to the updated user object or an error message.
+ */
+
+async function AddFundsUser(userId, amount) {
+    // Validate input
+    if (!userId || typeof amount !== 'number') {
+      throw new Error('Invalid input');
+    }
+  
+    try {
+      // Perform the update operation using Sequelize's update method
+      const [updatedRowsCount] = await User.update(
+        { balance: sequelize.literal(`balance + ${amount}`) }, // Use sequelize.literal to perform a calculation in SQL
+        { where: { user_id: userId } }
+      );
+  
+      if (updatedRowsCount === 0) {
+        throw new Error('User not found or no change in balance');
+      }
+  
+      // Fetch the updated user to return the updated data
+      const updatedUser = await User.findByPk(userId);
+  
+      return { message: 'Funds added successfully', user: updatedUser };
+    } catch (error) {
+      console.error('Error updating user balance:', error);
+      throw new Error('Error updating user balance: ' + error.message);
+    }
+  }
+
+  async function WithdrawFundsUser(userId, amount) {
+    // Validate input
+    if (!userId || typeof amount !== 'number' || amount <= 0) {
+      throw new Error('Invalid input');
+    }
+  
+    try {
+      // Find the user by user_id
+      const user = await User.findByPk(userId);
+  
+      if (!user) {
+        throw new Error('User not found');
+      }
+  
+      // Check if the user has sufficient funds
+      if (user.balance < amount) {
+        throw new Error('Insufficient funds');
+      }
+  
+      // Perform the update operation using Sequelize's update method
+      const [updatedRowsCount] = await User.update(
+        { balance: sequelize.literal(`balance - ${amount}`) }, // Use sequelize.literal to perform a calculation in SQL
+        { where: { user_id: userId } }
+      );
+  
+      if (updatedRowsCount === 0) {
+        throw new Error('Failed to withdraw funds');
+      }
+  
+      // Fetch the updated user to return the updated data
+      const updatedUser = await User.findByPk(userId);
+  
+      return { message: 'Funds withdrawn successfully', user: updatedUser };
+    } catch (error) {
+      console.error('Error withdrawing funds:', error);
+      throw new Error('Error withdrawing funds: ' + error.message);
+    }
+  }
+
+async function getAllStocks(userId, date)
 {
     try {
         // Fetch sum of shares owned per stock up to the input date
@@ -240,8 +310,9 @@ async function calculateUserStockValuations(userId, startDate, endDate) {
 module.exports = {
     getTotalInvestment,
     getTotalValuation,
+    AddFundsUser,
+    WithdrawFundsUser,
     getAllStocks,
-    getDates,
     calculateUserStockValuations
 }
 
