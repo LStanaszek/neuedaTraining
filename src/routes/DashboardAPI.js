@@ -51,11 +51,8 @@ router.get("/GetPerfromanceGraphData", async (req, res) => {
       const start = await getDates(timeframe);
       const end = new Date().toISOString().split('T')[0];
 
-      const allStocks = await getAllStocks( userId, date, 0)
+      const valuations = await calculateUserStockValuations(userId, start, end);
 
-      res.json({
-          stocks : allStocks
-      });
     } catch (error) {
       res.status(500).json({ error: 'An error occurred getting graph data.' });
       console.error('Error getting graph data:', error);

@@ -164,10 +164,84 @@ async function getDates(timeframe) {
     return start;
 }
 
+async function calculateUserStockValuations(userId, startDate, endDate) {
+    try {
+        // Fetch all relevant transactions for the user within the date range
+        const transactions = await Transaction.findAll({
+            where: {
+                user_id: userId,
+                trade_timestamp: { [Op.between]: [startDate, endDate] },
+            },
+            include: [{
+                model: Stock,
+                attributes: ['ticker', 'stock_name'],
+            }],
+            order: [['trade_timestamp', 'ASC']],
+        });
+
+        // Aggregate transactions to determine net shares owned per stock up to the end date
+        const stockHoldings = {};
+        transactions.forEach(transaction => {
+            const { stock_id, share_quantity, Stock } = transaction;
+            if (!stockHoldings[stock_id]) {
+                stockHoldings[stock_id] = {
+                    ticker: Stock.ticker,
+                    stock_name: Stock.stock_name,
+                    totalShares: 0,
+                };
+            }
+            stockHoldings[stock_id].totalShares += share_quantity;
+        });
+
+        // Remove any stocks where the user has no shares
+        Object.keys(stockHoldings).forEach(stock_id => {
+            if (stockHoldings[stock_id].totalShares <= 0) {
+                delete stockHoldings[stock_id];
+            }
+        });
+
+        // Fetch historical prices for each stock within the date range
+        const stockPricePromises = Object.values(stockHoldings).map(stock => {
+            return yahooFinance.historical({
+                symbol: stock.ticker,
+                from: startDate,
+                to: endDate,
+                period: '1d',
+            }).then(prices => ({ ticker: stock.ticker, prices }));
+        });
+
+        const stockPrices = await Promise.all(stockPricePromises);
+
+        // Calculate daily valuations
+        const dailyValuations = {};
+        stockPrices.forEach(stockData => {
+            const { ticker, prices } = stockData;
+            prices.forEach(priceData => {
+                const date = priceData.date.toISOString().split('T')[0];
+                if (!dailyValuations[date]) {
+                    dailyValuations[date] = 0;
+                }
+                const stock_id = Object.keys(stockHoldings).find(id => stockHoldings[id].ticker === ticker);
+                dailyValuations[date] += stockHoldings[stock_id].totalShares * priceData.close;
+            });
+        });
+
+        // Convert dailyValuations object to array format
+        return Object.keys(dailyValuations).map(date => ({
+            date,
+            totalValuation: dailyValuations[date],
+        }));
+    } catch (error) {
+        console.error('Error calculating stock valuations:', error);
+        throw new Error('An error occurred while calculating stock valuations.');
+    }
+}
+
 module.exports = {
     getTotalInvestment,
     getTotalValuation,
     getAllStocks,
-    getDates
+    getDates,
+    calculateUserStockValuations
 }
 
