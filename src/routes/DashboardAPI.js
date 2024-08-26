@@ -50,28 +50,6 @@ router.put('/WithdrawFunds', async (req, res) => {
   }
 });
 
-router.put('/AddFunds', async (req, res) => {
-  const { user_id, amount } = req.body;
-
-  try {
-    const result = await AddFundsUser(user_id, amount);
-    res.json(result);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-router.put('/WithdrawFunds', async (req, res) => {
-  const { user_id, amount } = req.body;
-
-  try {
-    const result = await WithdrawFundsUser(user_id, amount);
-    res.json(result);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
 router.get("/GetAll", async (req, res) => {
   try {
       const { userId} = req.query; // Expecting date as an input parameter (e.g., ?date=2024-08-20)
