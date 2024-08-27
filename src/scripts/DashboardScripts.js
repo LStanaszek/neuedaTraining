@@ -391,7 +391,7 @@ async function getUserBalance(userId) {
         }
 
         // Return the balance as an object
-        return { balance: user.balance };
+        return { balance: parseFloat(user.balance).toFixed(2) };
     } catch (error) {
         console.error('Error fetching user balance:', error);
         throw new Error('An error occurred while fetching the balance: ' + error.message);
