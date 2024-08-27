@@ -3,6 +3,7 @@ const axios = require("axios");
 require("dotenv").config();
 const finnhub = require('finnhub');
 const { Op } = require('sequelize');
+const yahooFinance = require('yahoo-finance2').default;
 
 async function getTotalInvestment() {
     try {
@@ -148,27 +149,28 @@ async function AddFundsUser(userId, amount) {
     }
   }
 
-async function getAllStocks(userId, date)
+async function getAllStocks(userId, date, flag=0)
 {
     try {
         // Fetch sum of shares owned per stock up to the input date
         const holdings = await Transaction.findAll({
             attributes: [
                 'stock_id',
-                // Use Sequelize's raw query to cast the SUM result to a number directly
-                [sequelize.literal('SUM(share_quantity)'), 'totalShares']
+                [sequelize.fn('SUM', sequelize.col('share_quantity')), 'totalShares']
             ],
             where: {
                 user_id: userId,
-                trade_timestamp: { [Op.lte]: new Date(date) } // Up to the specified date
+                trade_timestamp: { [Op.lte]: new Date(date) } // Up to today
             },
             include: [
                 {
                     model: Stock,
                     attributes: ['ticker', 'stock_name'], // Include stock details
+                    required: true, // Perform an INNER JOIN
                 }
             ],
-            group: ['stock_id'], // Group by stock_id and stock details
+            group: ['stock_id'], // Group by stock_id
+            having: sequelize.literal('SUM(share_quantity) > 0') // Exclude stocks where totalShares is 0
         });
 
         //console.log(holdings);
@@ -179,8 +181,17 @@ async function getAllStocks(userId, date)
             const { ticker, stock_name } = Stock;
             const totalShares = holding.get('totalShares');
 
-            // Get the current price from Finnhub
-            const currentPrice = await getCurrentStockPrice(ticker);
+            var currentPrice;
+
+            
+            if (flag === 0) {
+                // Get the current price from Finnhub
+                currentPrice = await getCurrentStockPrice(ticker);
+            }
+            else
+            {
+                currentPrice = getStockPriceData(ticker, interval = "1d", date, date)
+            }
 
             // Calculate the total market value
             const marketValue = currentPrice * parseInt(totalShares);
@@ -204,10 +215,119 @@ async function getAllStocks(userId, date)
 
 }
 
+async function getDates(timeframe) {
+    const end = new Date().toISOString().split('T')[0];
+    const startTemp = new Date();
+    let start;
+
+    console.log(timeframe);
+
+    if (timeframe == 0) {
+        startTemp.setDate(startTemp.getDate() - 7);
+    } else if (timeframe == 1) {
+        startTemp.setMonth(startTemp.getMonth() - 1);
+    } else if (timeframe == 2) {
+        startTemp.setMonth(startTemp.getMonth() - 6);
+    } else {
+        startTemp.setFullYear(startTemp.getFullYear() - 1);
+    }
+
+    start = startTemp.toISOString().split('T')[0];
+
+    return start;
+}
+
+async function calculateHistoricalWealth(userId, startDate, endDate) {
+    try {
+        // Fetch all relevant transactions for the user within the date range
+        const transactions = await Transaction.findAll({
+            where: {
+                user_id: userId,
+                trade_timestamp: { [Op.between]: [startDate, endDate] },
+            },
+            include: [{
+                model: Stock,
+                attributes: ['ticker', 'stock_name'],
+            }],
+            order: [['trade_timestamp', 'ASC']],
+        });
+
+        console.log("A");
+
+        // Aggregate transactions to determine net shares owned per stock up to the end date
+        const stockHoldings = {};
+        transactions.forEach(transaction => {
+            const { stock_id, share_quantity, Stock } = transaction;
+            if (!stockHoldings[stock_id]) {
+                stockHoldings[stock_id] = {
+                    ticker: Stock.ticker,
+                    stock_name: Stock.stock_name,
+                    totalShares: 0,
+                };
+            }
+            stockHoldings[stock_id].totalShares += share_quantity;
+        });
+
+        console.log("B");
+
+        // Remove any stocks where the user has no shares
+        Object.keys(stockHoldings).forEach(stock_id => {
+            if (stockHoldings[stock_id].totalShares <= 0) {
+                delete stockHoldings[stock_id];
+            }
+        });
+
+        console.log("C");
+
+        // Fetch historical prices for each stock within the date range using yahoo-finance2
+        const stockPricePromises = Object.values(stockHoldings).map(stock => {
+            return yahooFinance.chart(stock.ticker, {
+                interval: '1d',  // Daily prices
+                period1: startDate, // Start date
+                period2: endDate, // End date
+            }).then(chart => ({
+                ticker: stock.ticker,
+                prices: chart.quotes,
+            }));
+        });
+
+        const stockPrices = await Promise.all(stockPricePromises);
+
+        console.log("D");
+
+        // Calculate daily valuations
+        const dailyValuations = {};
+        stockPrices.forEach(stockData => {
+            const { ticker, prices } = stockData;
+            prices.forEach(priceData => {
+                const date = priceData.date.toISOString().split('T')[0];
+                if (!dailyValuations[date]) {
+                    dailyValuations[date] = 0;
+                }
+                const stock_id = Object.keys(stockHoldings).find(id => stockHoldings[id].ticker === ticker);
+                dailyValuations[date] += stockHoldings[stock_id].totalShares * priceData.close;
+            });
+        });
+
+        console.log("E");
+
+        // Convert dailyValuations object to array format
+        return Object.keys(dailyValuations).map(date => ({
+            date,
+            totalValuation: dailyValuations[date],
+        }));
+    } catch (error) {
+        console.error('Error calculating stock valuations:', error);
+        throw new Error('An error occurred while calculating stock valuations.');
+    }
+}
+
 module.exports = {
     getTotalInvestment,
     getTotalValuation,
     AddFundsUser,
     WithdrawFundsUser,
-    getAllStocks
+    getAllStocks,
+    calculateHistoricalWealth,
+    getDates
 }
