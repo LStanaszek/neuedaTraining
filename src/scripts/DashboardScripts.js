@@ -382,6 +382,7 @@ module.exports = {
     AddFundsUser,
     WithdrawFundsUser,
     getAllStocks,
+    getCurrentStockPrice,
     calculateHistoricalWealth,
-    getDates
+    getDates,
 }
