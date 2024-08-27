@@ -16,10 +16,53 @@
                     <a class="nav-link" href="funds.html">Add Funds</a>
                 </li>
               </ul>
-            <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
+              <form class="d-flex position-relative" role="search" onsubmit="return false;">
+                <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" id="searchBox" oninput="fetchSearchSuggestions()">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+                <ul class="dropdown-menu position-absolute w-100" id="suggestionsList" style="display:none; z-index:1000;"></ul>
             </form>
         </div>
     </div>
 </nav>
+
+
+<script>
+    async function fetchSearchSuggestions() {
+        const query = document.getElementById('searchBox').value;
+    
+        if (query.length < 2) {
+            document.getElementById('suggestionsList').style.display = 'none';
+            return;
+        }
+    
+        try {
+            const response = await fetch(`http://localhost:3000/SearchSuggestion/SymbolSearch?ticker=${encodeURIComponent(query)}`);
+            const data = await response.json();
+    
+            const suggestions = data.SymbolSearch;
+            const suggestionsList = document.getElementById('suggestionsList');
+    
+            suggestionsList.innerHTML = ''; // Clear previous suggestions
+    
+            if (suggestions.length > 0) {
+                suggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.classList.add('dropdown-item');
+                    li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name} (${suggestion.region})`;
+                    li.onclick = () => {
+                        document.getElementById('searchBox').value = suggestion.symbol;
+                        document.getElementById('suggestionsList').style.display = 'none';
+                    };
+                    suggestionsList.appendChild(li);
+                });
+                suggestionsList.style.display = 'block';
+            } else {
+                suggestionsList.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error fetching search suggestions:', error);
+            document.getElementById('suggestionsList').style.display = 'none';
+        }
+    }
+    </script>
+    

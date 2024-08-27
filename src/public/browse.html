@@ -6,11 +6,32 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <style>
+        #suggestionsList .dropdown-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        #suggestionsList .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        #suggestionsList .dropdown-item strong {
+            color: #007bff;
+        }
+
+        #suggestionsList .dropdown-item span {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
     </head>
 
     <body>
         <div id="navbar"></div>
         <h1> </h1>
+        <div id="modal-container"></div> <!-- Placeholder for the modal -->
 
 
         <script>
@@ -34,134 +55,201 @@
                         }
                     });
                 });
+                  // Load the modal from modal.html
+        // Load the modal from modal.html into the modal-container div
+        fetch('./modal.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('modal-container').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error loading modal:', error);
+            });
 
-                async function fetchWatchlist() {
-        try {
-            const response = await fetch('http://localhost:3000/Browse/watchlist');
-            const data = await response.json();
-            const watchlistItems = document.getElementById('watchlistItems');
-            const additionalWatchlistItems = document.getElementById('additionalWatchlistItems');
 
-            data.forEach((item, index) => {
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item';
+       
 
-                listItem.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <span>${item.name} (${item.ticker})</span>
-                            <span class="badge bg-primary badge-pill ms-2">$${item.current_price}</span>
-                            <span class="badge bg-secondary ms-2">${item.growth_today}%</span>
-                        </div>
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-outline-primary me-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail${item.id}" aria-expanded="false" aria-controls="collapseDetail${item.id}" onclick="showStockDetail('${item.ticker}', ${item.id})">View Detail</button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
-                        </div>
-                    </div>
-                    <div class="collapse mt-2" id="collapseDetail${item.id}">
-                        <div class="card card-body" id="detailContent${item.id}">
-                            <p>Loading details...</p>
-                        </div>
-                    </div>
-                `;
 
-                // Display the first 3 items by default, and the rest in the collapsible section
-                if (index < 3) {
-                    watchlistItems.appendChild(listItem);
-                } else {
-                    additionalWatchlistItems.appendChild(listItem);
+                async function fetchSearchSuggestions() {
+                const query = document.getElementById('searchBox').value;
+            
+                if (query.length < 2) {
+                    document.getElementById('suggestionsList').style.display = 'none';
+                    return;
                 }
-            });
-        } catch (error) {
-            console.error('Error fetching watchlist:', error);
-        }
-    }
-    // Function to get company profile from your backend
-    async function getCompanyProfile(ticker) {
-        try {
-            const response = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch company profile for ${ticker}`);
+            
+                try {
+                    const response = await fetch(`http://localhost:3000/SearchSuggestion/SymbolSearch?ticker=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+            
+                    const suggestions = data.SymbolSearch;
+                    const suggestionsList = document.getElementById('suggestionsList');
+            
+                    suggestionsList.innerHTML = ''; // Clear previous suggestions
+            
+                    if (suggestions.length > 0) {
+                        suggestions.forEach(suggestion => {
+                            const li = document.createElement('li');
+                            li.classList.add('dropdown-item');
+                            li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name} (${suggestion.region})`;
+                            li.onclick = () => {
+                                document.getElementById('searchBox').value = suggestion.symbol;
+                                document.getElementById('suggestionsList').style.display = 'none';
+                            };
+                            suggestionsList.appendChild(li);
+                        });
+                        suggestionsList.style.display = 'block';
+                    } else {
+                        suggestionsList.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching search suggestions:', error);
+                    document.getElementById('suggestionsList').style.display = 'none';
+                }
             }
-            const data = await response.json();
-            return data.CompanyInfo; // Access the CompanyInfo object directly
-        } catch (error) {
-            console.error(`Error fetching company profile for ${ticker}:`, error);
-            throw error;  // Re-throw the error if you want to handle it later
-        }
-    }
+    
+            async function fetchWatchlist() {
+            try {
+                const response = await fetch('http://localhost:3000/Browse/watchlist');
+                const data = await response.json();
+                const watchlistItems = document.getElementById('watchlistItems');
 
-    // Function to show stock details in the dropdown
-    async function showStockDetail(ticker, id) {
-        const detailContent = document.getElementById(`detailContent${id}`);
-        try {
-            const profile = await getCompanyProfile(ticker);
-            detailContent.innerHTML = `
-                <p><strong>Company Name:</strong> ${profile.name}</p>
-                <p><strong>Ticker:</strong> ${profile.ticker}</p>
-                <p><strong>Country:</strong> ${profile.country}</p>
-                <p><strong>Exchange:</strong> ${profile.exchange}</p>
-                <p><strong>Phone:</strong> ${profile.phone}</p>
-                <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
-            `;
-        } catch (error) {
-            detailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
-        }
-    }
+                data.forEach((item) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
 
-    // Function to remove a stock from the watchlist
-    async function removeFromWatchlist(watchID, buttonElement) {
-        try {
-            const response = await fetch(`http://localhost:3000/Browse/watchlist/delete?watchID=${watchID}`, {
-                method: 'DELETE',
-            });
+                    listItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span>${item.name} (${item.ticker})</span>
+                                <span class="badge bg-primary badge-pill ms-2">$${item.current_price}</span>
+                                <span class="badge bg-secondary ms-2">${item.growth_today}%</span>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-primary me-2" type="button" onclick="showStockDetail('${item.ticker}')">View Detail</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
+                            </div>
+                        </div>
+                    `;
 
-            if (response.ok) {
-                const listItem = buttonElement.closest('.list-group-item');
-                listItem.remove();
-            } else {
-                console.error('Failed to remove stock from watchlist');
+                    watchlistItems.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error fetching watchlist:', error);
             }
-        } catch (error) {
-            console.error('Error removing stock from watchlist:', error);
         }
-    }
 
-    // Fetch the watchlist when the page loads
-    document.addEventListener('DOMContentLoaded', fetchWatchlist);
+        async function getCompanyProfile(ticker) {
+            try {
+                const response = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch company profile for ${ticker}`);
+                }
+                const data = await response.json();
+                return data.CompanyInfo;
+            } catch (error) {
+                console.error(`Error fetching company profile for ${ticker}:`, error);
+                throw error;
+            }
+        }
+
+
+
+        async function showStockDetail(ticker) {
+    const modalDetailContent = document.getElementById('modalDetailContent');
+    const modalTitle = document.getElementById('stockDetailModalLabel');
+
+    try {
+        // Fetch company profile data
+        const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+        if (!profileResponse.ok) {
+            throw new Error(`Failed to fetch company profile for ${ticker}`);
+        }
+        const profileData = await profileResponse.json();
+        const profile = profileData.CompanyInfo;
+
+        // Fetch current stock data (assuming it's from the watchlist data)
+        const watchlistResponse = await fetch('http://localhost:3000/Browse/watchlist');
+        const watchlistData = await watchlistResponse.json();
+        const stockData = watchlistData.find(stock => stock.ticker === ticker);
+
+        // Update modal title with company name and logo
+        modalTitle.innerHTML = `
+            <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
+            ${profile.name}
+        `;
+
+        // Update modal content with current price, growth, and company details
+        modalDetailContent.innerHTML = `
+            <p><strong>Current Price:</strong> $${stockData.current_price}</p>
+            <p><strong>Growth Today:</strong> ${stockData.growth_today}%</p>
+            <hr>
+            <p><strong>Company Name:</strong> ${profile.name}</p>
+            <p><strong>Ticker:</strong> ${profile.ticker}</p>
+            <p><strong>Country:</strong> ${profile.country}</p>
+            <p><strong>Exchange:</strong> ${profile.exchange}</p>
+            <p><strong>Phone:</strong> ${profile.phone}</p>
+            <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
+        `;
+
+        // Show the modal
+        const stockDetailModal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
+        stockDetailModal.show();
+    } catch (error) {
+        modalDetailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+        async function removeFromWatchlist(watchID, buttonElement) {
+            try {
+                const response = await fetch(`http://localhost:3000/Browse/watchlist/delete?watchID=${watchID}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    const listItem = buttonElement.closest('.list-group-item');
+                    listItem.remove();
+                } else {
+                    console.error('Failed to remove stock from watchlist');
+                }
+            } catch (error) {
+                console.error('Error removing stock from watchlist:', error);
+            }
+        }
+
+        // Fetch the watchlist when the page loads
+        document.addEventListener('DOMContentLoaded', fetchWatchlist);
 </script>
 
-<!-- Watchlist Section -->
-<div class="container mt-4 d-flex justify-content-center">
-    <div class="col-lg-6 col-md-8 col-sm-12">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4>Watchlist</h4>
-                <div>
-                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#watchlistCollapse" aria-expanded="false" aria-controls="watchlistCollapse">
-                        View All
-                    </button>
+    <!-- Watchlist Section -->
+    <div class="container mt-4 d-flex justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Watchlist</h4>
                 </div>
-            </div>
-            <ul class="list-group list-group-flush" id="watchlistItems">
-                <!-- Watchlist items will be populated here dynamically -->
-            </ul>
-            <div id="watchlistCollapse" class="collapse">
-                <ul class="list-group list-group-flush" id="additionalWatchlistItems">
-                    <!-- Additional watchlist items will be populated here dynamically -->
+                <ul class="list-group list-group-flush" id="watchlistItems">
+                    <!-- Watchlist items will be populated here dynamically -->
                 </ul>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Bootstrap JS (necessary for collapse) -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-
-
-
-
+    <!-- Bootstrap JS (necessary for modal) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
 
 
