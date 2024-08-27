@@ -280,15 +280,14 @@
 
                 modalTitle.innerHTML = `
                     <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
-                    ${profile.name}
+                    ${profile.name}(${profile.ticker})
                 `;
+
 
                 modalDetailContent.innerHTML = `
                     <p><strong>Current Price:</strong> $${stockData.current_price}</p>
                     <p><strong>Growth Today:</strong> ${stockData.growth_today}%</p>
                     <hr>
-                    <p><strong>Company Name:</strong> ${profile.name}</p>
-                    <p><strong>Ticker:</strong> ${profile.ticker}</p>
                     <p><strong>Country:</strong> ${profile.country}</p>
                     <p><strong>Exchange:</strong> ${profile.exchange}</p>
                     <p><strong>Phone:</strong> ${profile.phone}</p>
