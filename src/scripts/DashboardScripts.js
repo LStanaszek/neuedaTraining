@@ -331,4 +331,3 @@ module.exports = {
     calculateHistoricalWealth,
     getDates
 }
-

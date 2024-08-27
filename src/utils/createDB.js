@@ -24,7 +24,11 @@ const Stock = sequelize.define('Stock', {
     stock_name : {type: DataTypes.STRING, allowNull:false},
     ticker : {type: DataTypes.STRING, allowNull:false, unique:true},
     sector_id : {type: DataTypes.INTEGER, allowNull:false, references: {model: Sector, key: 'sector_id'}, onDelete: 'CASCADE'},
-    num_employees : {type: DataTypes.INTEGER, allowNull:false}
+    num_employees : {type: DataTypes.INTEGER, allowNull:false},
+    company_country: { type: DataTypes.STRING(255), allowNull: true }, // New column for country
+    currency: { type: DataTypes.STRING(10), allowNull: true }, // New column for currency
+    exchange: { type: DataTypes.STRING(255), allowNull: true }, // New column for exchange
+    weburl: { type: DataTypes.STRING(255), allowNull: true } // New column for web URL
     }, {
     tableName:'stocks',
     timestamps:false
