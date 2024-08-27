@@ -168,7 +168,36 @@ async function sellStocks(stock_id, share_quantity, user_id) {
     }
 }
 
+async function getShareAmount(userID, ticker)
+{
+    try {
+        // Find the stock ID associated with the passed ticker
+        const stock = await Stock.findOne({ where: { ticker } });
+        if (!stock) {
+            throw new Error('Stock not found');
+        }
+
+        const result = await Transaction.findOne({
+            attributes: [
+                [sequelize.fn('SUM', sequelize.col('share_quantity')), 'netShares']
+            ],
+            where: {
+                stock_id: stock.stock_id,
+            }
+        });
+
+        // If no transactions are found, netShares should be 0
+        const netShares = result.get('netShares') || 0;
+
+        return {ticker : parseInt(netShares, 10)};
+    }
+    catch (error) {
+        console.error('Error fetching stocks for passed ticker:', error);
+    }
+}
+
 module.exports = {
     purchaseStocks,
-    sellStocks
+    sellStocks,
+    getShareAmount
 }
