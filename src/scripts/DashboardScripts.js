@@ -159,8 +159,7 @@ async function getAllStocks(userId, date, flag=0)
                 [sequelize.fn('SUM', sequelize.col('share_quantity')), 'totalShares']
             ],
             where: {
-                user_id: userId,
-                trade_timestamp: { [Op.lte]: new Date(date) } // Up to today
+                user_id: userId
             },
             include: [
                 {
@@ -379,34 +378,35 @@ async function calculateHistoricalWealth(userId, startDate, endDate) {
 async function getStockPie(userID) 
 {
     try {
-        // Fetch the current stock holdings for the user
+        // Fetch sum of shares owned per stock up to the input date
         const holdings = await Transaction.findAll({
             attributes: [
                 'stock_id',
                 [sequelize.fn('SUM', sequelize.col('share_quantity')), 'totalShares']
             ],
             where: {
-                user_id: userID,
+                user_id: userID
             },
             include: [
                 {
                     model: Stock,
                     attributes: ['ticker', 'stock_name'], // Include stock details
+                    required: true, // Perform an INNER JOIN
                 }
             ],
             group: ['stock_id'], // Group by stock_id
+            having: sequelize.literal('SUM(share_quantity) > 0') // Exclude stocks where totalShares is 0
         });
 
+        //console.log(holdings);
 
         // Calculate the current valuation of each stock
         const stockValuations = await Promise.all(holdings.map(async (holding) => {
-            const { totalShares, Stock } = holding;
+            const { totalShares, Stock } = holding.dataValues;
             const { ticker, stock_name } = Stock;
-            
+
             // Get the current price from Finnhub using existing getCurrentStockPrice function
             const currentPrice = await getCurrentStockPrice(ticker);
-
-            console.log(totalShares);
 
             // Calculate the market value
             const marketValue = currentPrice * parseFloat(totalShares);
@@ -420,8 +420,6 @@ async function getStockPie(userID)
 
         totalValuation = await getTotalValuation();
 
-        console.log(totalValuation);
-
         // Sort the stocks by market value in descending order
         stockValuations.sort((a, b) => b.marketValue - a.marketValue);
 
@@ -432,13 +430,13 @@ async function getStockPie(userID)
 
          // Calculate the percentage of total valuation for each of the top stocks
          const stockNames = topStocks.map(stock => stock.stock_name);
-         const percentages = topStocks.map(stock => (stock.marketValue / totalValuation) * 100);
+         const percentages = topStocks.map(stock => ((stock.marketValue / totalValuation) * 100).toFixed(2));
  
          // Calculate the percentage for the "Other" category if there are more than 4 stocks
          if (stockValuations.length > 4) {
              const otherValuation = stockValuations.slice(4).reduce((sum, stock) => sum + stock.marketValue, 0);
              stockNames.push('Other');
-             percentages.push((otherValuation / totalValuation) * 100);
+             percentages.push(((otherValuation / totalValuation) * 100).toFixed(2));
          }
  
          return {
