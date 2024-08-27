@@ -239,11 +239,11 @@ async function getDates(timeframe) {
 
 async function calculateHistoricalWealth(userId, startDate, endDate) {
     try {
-        // Fetch all relevant transactions for the user within the date range
+        // Fetch all relevant transactions for the user up to the end date
         const transactions = await Transaction.findAll({
             where: {
                 user_id: userId,
-                trade_timestamp: { [Op.between]: [startDate, endDate] },
+                trade_timestamp: { [Op.lte]: endDate }, // Fetch transactions up to the end date
             },
             include: [{
                 model: Stock,
@@ -252,9 +252,7 @@ async function calculateHistoricalWealth(userId, startDate, endDate) {
             order: [['trade_timestamp', 'ASC']],
         });
 
-        console.log("A");
-
-        // Aggregate transactions to determine net shares owned per stock up to the end date
+        // Determine unique stocks involved in transactions
         const stockHoldings = {};
         transactions.forEach(transaction => {
             const { stock_id, share_quantity, Stock } = transaction;
@@ -262,22 +260,25 @@ async function calculateHistoricalWealth(userId, startDate, endDate) {
                 stockHoldings[stock_id] = {
                     ticker: Stock.ticker,
                     stock_name: Stock.stock_name,
-                    totalShares: 0,
+                    dailyShares: {}
                 };
             }
-            stockHoldings[stock_id].totalShares += share_quantity;
-        });
-
-        console.log("B");
-
-        // Remove any stocks where the user has no shares
-        Object.keys(stockHoldings).forEach(stock_id => {
-            if (stockHoldings[stock_id].totalShares <= 0) {
-                delete stockHoldings[stock_id];
+            const transactionDate = transaction.trade_timestamp.toISOString().split('T')[0];
+            if (!stockHoldings[stock_id].dailyShares[transactionDate]) {
+                stockHoldings[stock_id].dailyShares[transactionDate] = 0;
             }
+            stockHoldings[stock_id].dailyShares[transactionDate] += share_quantity;
         });
 
-        console.log("C");
+        // Calculate cumulative shares owned up to each date
+        for (let stock_id in stockHoldings) {
+            let cumulativeShares = 0;
+            const sortedDates = Object.keys(stockHoldings[stock_id].dailyShares).sort();
+            sortedDates.forEach(date => {
+                cumulativeShares += stockHoldings[stock_id].dailyShares[date];
+                stockHoldings[stock_id].dailyShares[date] = cumulativeShares;
+            });
+        }
 
         // Fetch historical prices for each stock within the date range using yahoo-finance2
         const stockPricePromises = Object.values(stockHoldings).map(stock => {
@@ -293,29 +294,82 @@ async function calculateHistoricalWealth(userId, startDate, endDate) {
 
         const stockPrices = await Promise.all(stockPricePromises);
 
-        console.log("D");
+        // Initialize arrays for dates and valuations
+        const dates = [];
+        const valuations = {};
 
-        // Calculate daily valuations
-        const dailyValuations = {};
+        // Calculate daily valuations based on net shares owned
         stockPrices.forEach(stockData => {
             const { ticker, prices } = stockData;
+            let lastAvailablePrice = null;
+
             prices.forEach(priceData => {
                 const date = priceData.date.toISOString().split('T')[0];
-                if (!dailyValuations[date]) {
-                    dailyValuations[date] = 0;
-                }
                 const stock_id = Object.keys(stockHoldings).find(id => stockHoldings[id].ticker === ticker);
-                dailyValuations[date] += stockHoldings[stock_id].totalShares * priceData.close;
+
+                // Use the latest cumulative shares owned up to the current date
+                const latestDateWithShares = Object.keys(stockHoldings[stock_id].dailyShares)
+                    .filter(d => d <= date)
+                    .sort()
+                    .pop();
+
+                const sharesOwned = latestDateWithShares
+                    ? stockHoldings[stock_id].dailyShares[latestDateWithShares]
+                    : 0;
+
+                // If there's no price for the day, use the last available price
+                const currentPrice = priceData.close || lastAvailablePrice;
+
+                if (sharesOwned > 0 && currentPrice !== null) {
+                    valuations[date] = (valuations[date] || 0) + sharesOwned * currentPrice;
+                }
+
+                // Update the last available price
+                if (priceData.close !== null) {
+                    lastAvailablePrice = priceData.close;
+                }
+
+                // Only add unique dates to the dates array
+                if (!dates.includes(date)) {
+                    dates.push(date);
+                }
             });
         });
 
-        console.log("E");
+        // Fill in missing dates between startDate and endDate
+        let currentValuation = 0;
+        let currentDate = new Date(startDate);
+        const end = new Date(endDate);
 
-        // Convert dailyValuations object to array format
-        return Object.keys(dailyValuations).map(date => ({
-            date,
-            totalValuation: dailyValuations[date],
-        }));
+        while (currentDate <= end) {
+            const formattedDate = currentDate.toISOString().split('T')[0];
+
+            // Use previous day's valuation if there's no valuation for the current date
+            if (!valuations[formattedDate]) {
+                valuations[formattedDate] = currentValuation;
+            } else {
+                currentValuation = valuations[formattedDate];
+            }
+
+            if (!dates.includes(formattedDate)) {
+                dates.push(formattedDate);
+            }
+
+            // Move to the next day
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        // Sort the dates to ensure they are in chronological order
+        dates.sort();
+
+        // Convert valuations object to an array that matches the dates array
+        const valuationsArray = dates.map(date => valuations[date] || 0);
+
+        // Return the final JSON object
+        return {
+            dates,
+            valuations: valuationsArray
+        };
     } catch (error) {
         console.error('Error calculating stock valuations:', error);
         throw new Error('An error occurred while calculating stock valuations.');
