@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS stocks (
     sector_id INTEGER NOT NULL,
     num_employees INTEGER NOT NULL,
     -- tbd for other info
+    company_country VARCHAR(255) NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    exchange VARCHAR(255) NOT NULL,
+    web_url VARCHAR (255) NOT NULL,
     FOREIGN KEY (sector_id) REFERENCES sectors (sector_id) ON DELETE CASCADE
 );
 
@@ -55,12 +59,12 @@ VALUES
 
 INSERT INTO stocks (stock_name, ticker, sector_id, num_employees)
 VALUES 
-('Apple Inc.', 'AAPL', 1, 147000),
-('Microsoft Corp.', 'MSFT', 1, 181000),
-('Pfizer Inc.', 'PFE', 2, 78000),
-('JP Morgan Chase', 'JPM', 3, 255351),
-('Exxon Mobil', 'XOM', 4, 63000),
-('Procter & Gamble', 'PG', 5, 101000);
+('Apple Inc.', 'AAPL', 1, 147000, 'USA', 'USD', 'NASDAQ', 'https://www.apple.com'),
+('Microsoft Corp.', 'MSFT', 1, 181000, 'USA', 'USD', 'NASDAQ', 'https://www.microsoft.com'),
+('Pfizer Inc.', 'PFE', 2, 78000, 'USA', 'USD', 'NYSE', 'https://www.pfizer.com'),
+('JP Morgan Chase', 'JPM', 3, 255351, 'USA', 'USD', 'NYSE', 'https://www.jpmorganchase.com'),
+('Exxon Mobil', 'XOM', 4, 63000, 'USA', 'USD', 'NYSE', 'https://corporate.exxonmobil.com'),
+('Procter & Gamble', 'PG', 5, 101000, 'USA', 'USD', 'NYSE', 'https://www.pg.com');
 
 INSERT INTO watchlist (stock_id)
 VALUES 
@@ -74,15 +78,16 @@ VALUES
 ('jane_smith', 150000.0000),
 ('alice_jones', 75000.0000);
 
-INSERT INTO transactions (stock_id, share_quantity, stock_price, user_id)
+INSERT INTO transactions (stock_id, trade_timestamp, share_quantity, stock_price, user_id)
 VALUES 
-(1, 100, 150.50, 1),
-(1, -50, 220.30, 1),
-(3, 200, 38.75, 1),
-(4, 150, 125.00, 1),
-(3, 80, 56.60, 1);
 
-/*######################### Drop Tables #####################*/
+(1, '2024-08-23',  -50, 220.30, 1),
+(1, '2024-08-22', 100, 150.50, 1),
+(3, '2024-08-21',  200, 38.75, 1),
+(4, '2024-08-20',  150, 125.00, 1),
+(3, '2024-08-19',  80, 56.60, 1);
+
+ /*######################### Drop Tables #####################*/
 -- DROP TABLE IF EXISTS Watchlist;
 -- DROP TABLE IF EXISTS Transactions;
 -- DROP TABLE IF EXISTS Stock;

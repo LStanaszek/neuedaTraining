@@ -1,5 +1,5 @@
 const express = require('express');
-const {getTotalInvestment, getTotalValuation, getAllStocks,  AddFundsUser, WithdrawFundsUser}  = require("../scripts/DashboardScripts");
+const {getTotalInvestment, getTotalValuation, getAllStocks,  AddFundsUser, WithdrawFundsUser, getDates, calculateHistoricalWealth}  = require("../scripts/DashboardScripts");
 
 const router = express.Router();
 
@@ -52,8 +52,9 @@ router.put('/WithdrawFunds', async (req, res) => {
 
 router.get("/GetAll", async (req, res) => {
   try {
-      const { userId, date } = req.query; // Expecting date as an input parameter (e.g., ?date=2024-08-20)
-      const allStocks = await getAllStocks( userId, date )
+      const { userId } = req.query; // Expecting date as an input parameter (e.g., ?date=2024-08-20)
+      const date = new Date().toISOString().split('T')[0]
+      const allStocks = await getAllStocks( userId, date)
       //console.log(totalInvestment);
       res.json({
           stocks : allStocks
@@ -61,6 +62,27 @@ router.get("/GetAll", async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: 'An error occurred getting total investemnt.' });
       console.error('Error fetching sum of product:', error);
+    }
+});
+
+router.get("/GetPerfromanceGraphData", async (req, res) => {
+  try {
+      //timeframe = 0,1,2 or 3 (1 week, 1 month, 6 month, 1 year)
+      const {userId, timeframe} = req.query;
+
+      const start = await getDates(timeframe);
+      const end = new Date().toISOString().split('T')[0];
+
+      console.log(start);
+      console.log(end);
+
+      const valuations = await calculateHistoricalWealth(userId, start, end);
+
+      res.json(valuations);
+
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred getting graph data.' });
+      console.error('Error getting graph data:', error);
     }
 });
 

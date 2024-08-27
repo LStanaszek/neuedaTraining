@@ -3,7 +3,14 @@ const express = require('express');
 require('dotenv').config();
 const yahooFinance = require('yahoo-finance2').default;
 const { Watchlist, Stock } = require('../utils/createDB');
-const { getStockPriceData, getWatchlist, deleteStockFromWatchlist, addStockToWatchlist } = require('../scripts/BrowseScripts');
+const { 
+    getStockPriceData, 
+    getWatchlist, 
+    deleteStockFromWatchlist, 
+    addStockToWatchlist,
+    getTopGainers,
+    getTopLosers 
+} = require('../scripts/BrowseScripts');
 
 const router = express.Router();
 
@@ -70,5 +77,26 @@ router.post('/watchlist/add', async (req, res) => {
     }
 });
 
+// GET list of Top Gainers from external API
+router.get('/top-gainers', async (req, res) => {
+    try {
+        const topGainers = await getTopGainers(); // Implement this function in BrowseScripts.js
+        res.json(topGainers);
+    } catch (error) {
+        console.error('Error fetching Top Gainers:', error);
+        res.status(500).json({ error: 'An error occurred while fetching Top Gainers.' });
+    }
+});
+
+// GET list of Top Losers from external API
+router.get('/top-losers', async (req, res) => {
+    try {
+        const topLosers = await getTopLosers(); // Implement this function in BrowseScripts.js
+        res.json(topLosers);
+    } catch (error) {
+        console.error('Error fetching Top Losers:', error);
+        res.status(500).json({ error: 'An error occurred while fetching Top Losers.' });
+    }
+});
 
 module.exports = router;
