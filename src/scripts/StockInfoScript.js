@@ -42,8 +42,7 @@ async function searchSymbols(query) {
   try {
       const response = await axios.get(url);
       const bestMatches = response.data['bestMatches'];
-console.log(bestMatches);
-//console.log("respome****************************", response);
+      console.log(bestMatches);
       if (!bestMatches || bestMatches.length === 0) {
           console.log('No matching symbols found.');
           return [];
