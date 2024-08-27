@@ -3,6 +3,7 @@ const axios = require("axios");
 require("dotenv").config();
 const finnhub = require('finnhub');
 const { Op } = require('sequelize');
+const yahooFinance = require('yahoo-finance2').default;
 
 async function getTotalInvestment() {
     try {
@@ -148,7 +149,7 @@ async function AddFundsUser(userId, amount) {
     }
   }
 
-async function getAllStocks(userId, date)
+async function getAllStocks(userId, date, flag=0)
 {
     try {
         // Fetch sum of shares owned per stock up to the input date
@@ -219,6 +220,8 @@ async function getDates(timeframe) {
     const startTemp = new Date();
     let start;
 
+    console.log(timeframe);
+
     if (timeframe == 0) {
         startTemp.setDate(startTemp.getDate() - 7);
     } else if (timeframe == 1) {
@@ -234,7 +237,7 @@ async function getDates(timeframe) {
     return start;
 }
 
-async function calculateUserStockValuations(userId, startDate, endDate) {
+async function calculateHistoricalWealth(userId, startDate, endDate) {
     try {
         // Fetch all relevant transactions for the user within the date range
         const transactions = await Transaction.findAll({
@@ -248,6 +251,8 @@ async function calculateUserStockValuations(userId, startDate, endDate) {
             }],
             order: [['trade_timestamp', 'ASC']],
         });
+
+        console.log("A");
 
         // Aggregate transactions to determine net shares owned per stock up to the end date
         const stockHoldings = {};
@@ -263,6 +268,8 @@ async function calculateUserStockValuations(userId, startDate, endDate) {
             stockHoldings[stock_id].totalShares += share_quantity;
         });
 
+        console.log("B");
+
         // Remove any stocks where the user has no shares
         Object.keys(stockHoldings).forEach(stock_id => {
             if (stockHoldings[stock_id].totalShares <= 0) {
@@ -270,17 +277,23 @@ async function calculateUserStockValuations(userId, startDate, endDate) {
             }
         });
 
-        // Fetch historical prices for each stock within the date range
+        console.log("C");
+
+        // Fetch historical prices for each stock within the date range using yahoo-finance2
         const stockPricePromises = Object.values(stockHoldings).map(stock => {
-            return yahooFinance.historical({
-                symbol: stock.ticker,
-                from: startDate,
-                to: endDate,
-                period: '1d',
-            }).then(prices => ({ ticker: stock.ticker, prices }));
+            return yahooFinance.chart(stock.ticker, {
+                interval: '1d',  // Daily prices
+                period1: startDate, // Start date
+                period2: endDate, // End date
+            }).then(chart => ({
+                ticker: stock.ticker,
+                prices: chart.quotes,
+            }));
         });
 
         const stockPrices = await Promise.all(stockPricePromises);
+
+        console.log("D");
 
         // Calculate daily valuations
         const dailyValuations = {};
@@ -295,6 +308,8 @@ async function calculateUserStockValuations(userId, startDate, endDate) {
                 dailyValuations[date] += stockHoldings[stock_id].totalShares * priceData.close;
             });
         });
+
+        console.log("E");
 
         // Convert dailyValuations object to array format
         return Object.keys(dailyValuations).map(date => ({
@@ -313,6 +328,7 @@ module.exports = {
     AddFundsUser,
     WithdrawFundsUser,
     getAllStocks,
-    calculateUserStockValuations
+    calculateHistoricalWealth,
+    getDates
 }
 
