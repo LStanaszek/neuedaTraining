@@ -65,7 +65,7 @@ router.get("/GetAll", async (req, res) => {
     }
 });
 
-router.get("/GetPerfromanceGraphData", async (req, res) => {
+router.get("/GetPerformanceGraphData", async (req, res) => {
   try {
       //timeframe = 0,1,2 or 3 (1 week, 1 month, 6 month, 1 year)
       const {userId, timeframe} = req.query;
