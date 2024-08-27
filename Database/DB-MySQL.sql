@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS stocks (
     -- tbd for other info
     company_country VARCHAR(255) NOT NULL,
     currency VARCHAR(10) NOT NULL,
-    exchange VARCHAR(255) NOT NULL,
+    exchanges VARCHAR(255) NOT NULL,
     web_url VARCHAR (255) NOT NULL,
     FOREIGN KEY (sector_id) REFERENCES sectors (sector_id) ON DELETE CASCADE
 );
@@ -57,7 +57,7 @@ VALUES
 ('Energy'),
 ('Consumer Goods');
 
-INSERT INTO stocks (stock_name, ticker, sector_id, num_employees)
+INSERT INTO stocks (stock_name, ticker, sector_id, num_employees, company_country, exchanges, currency, web_url)
 VALUES 
 ('Apple Inc.', 'AAPL', 1, 147000, 'USA', 'USD', 'NASDAQ', 'https://www.apple.com'),
 ('Microsoft Corp.', 'MSFT', 1, 181000, 'USA', 'USD', 'NASDAQ', 'https://www.microsoft.com'),
