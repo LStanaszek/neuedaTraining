@@ -6,11 +6,11 @@ const router = express.Router();
 
 // Endpoint to handle stock purchases
 router.post('/BuyStocks', async (req, res) => {
-    const { stock_id, share_quantity, stock_price, user_id } = req.body;
+    const { stock_id, share_quantity, user_id } = req.body;
 
     try {
         // Call the function to add stock purchase
-        const transaction = await purchaseStocks(stock_id, share_quantity, stock_price, user_id);
+        const transaction = await purchaseStocks(stock_id, share_quantity, user_id);
         res.status(201).json({
             message: 'Stock purchase recorded successfully',
             transaction,
@@ -22,11 +22,11 @@ router.post('/BuyStocks', async (req, res) => {
 
 // Endpoint to handle selling stocks
 router.post('/SellStocks', async (req, res) => {
-    const { stock_id, share_quantity, stock_price, user_id } = req.body;
+    const { stock_id, share_quantity, user_id } = req.body;
 
     try {
         // Call the function to sell stock
-        const transaction = await sellStocks(stock_id, share_quantity, stock_price, user_id);
+        const transaction = await sellStocks(stock_id, share_quantity, user_id);
         res.status(201).json({
             message: 'Stock sale recorded successfully',
             transaction,

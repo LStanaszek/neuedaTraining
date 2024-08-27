@@ -3,16 +3,17 @@
 const { sequelize, Sector, Stock, Watchlist, User, Transaction } = require('../utils/createDB')
 const axios = require('axios');
 require('dotenv').config();
+const { getCurrentStockPrice } = require("../scripts/DashboardScripts");
 
 //Asynchronous function to buy stocks
-async function purchaseStocks(stock_id, share_quantity, stock_price, user_id) {
+async function purchaseStocks(stock_id, share_quantity, user_id) {
 
     const t = await sequelize.transaction();
 
     try {
         // Validate input data
-        if (!stock_id || share_quantity <= 0 || !stock_price || !user_id) {
-            throw new Error('All fields are required: stock_id, share_quantity <= 0, stock_price, user_id');
+        if (!stock_id || share_quantity <= 0 || !user_id) {
+            throw new Error('All fields are required: stock_id, share_quantity <= 0, user_id');
         }
 
         // Find user
@@ -27,8 +28,11 @@ async function purchaseStocks(stock_id, share_quantity, stock_price, user_id) {
             throw new Error('Stock not found');
         }
 
+        // Get the current stock price using the ticker symbol
+        const currentStockPrice = await getCurrentStockPrice(stock.ticker);
+
         // Calculate the total cost of the stocks to be purchased
-        const totalCost = share_quantity * stock_price;
+        const totalCost = share_quantity * currentStockPrice;//use the current stock price - getCurrentStockPrice function
 
         // Check if the user has enough balance to cover the purchase
         if (user.balance < totalCost) {
@@ -39,7 +43,7 @@ async function purchaseStocks(stock_id, share_quantity, stock_price, user_id) {
         const newTransaction = await Transaction.create({
             stock_id: stock_id,
             share_quantity: share_quantity, // Positive for buying
-            stock_price: stock_price,
+            stock_price: currentStockPrice,
             user_id: user_id,
             trade_timestamp: new Date(), // Sequelize automatically handles the current timestamp
         }, { transaction: t });
@@ -62,15 +66,15 @@ async function purchaseStocks(stock_id, share_quantity, stock_price, user_id) {
 }
 
 //Asynchronous function to sell stocks
-async function sellStocks(stock_id, share_quantity, stock_price, user_id) {
+async function sellStocks(stock_id, share_quantity, user_id) {
 
     // Start a transaction
     const t = await sequelize.transaction();
 
     try {
         // Validate input data
-        if (!stock_id || share_quantity >= 0 || !stock_price || !user_id) {
-            throw new Error('All fields are required: stock_id, share_quantity >= 0, stock_price, user_id');
+        if (!stock_id || share_quantity <= 0 || !user_id) {
+            throw new Error('All fields are required: stock_id, share_quantity <= 0, user_id');
         }
 
         // Find user
@@ -92,26 +96,37 @@ async function sellStocks(stock_id, share_quantity, stock_price, user_id) {
         });
 
         // Validate that the user has enough shares to sell
-        if (totalSharesOwned + share_quantity < 0) { // share_quantity is negative for selling
-            console.log("You own a total of " + totalSharesOwned);
+        //if (totalSharesOwned + share_quantity < 0) { // share_quantity is negative for selling
+        //    console.log("You own a total of " + totalSharesOwned);
+        //    throw new Error('Insufficient shares to sell');
+        //}
+
+        // Validate that the user has enough shares to sell
+        if (totalSharesOwned < share_quantity) { // Ensure enough shares are available for sale
             throw new Error('Insufficient shares to sell');
         }
+
+        // Get the current stock price using the ticker symbol
+        const currentStockPrice = await getCurrentStockPrice(stock.ticker);
+
+        // Calculate the total credit from the shares sold
+        const totalCredit = share_quantity * currentStockPrice;
 
         // Create a new transaction for selling stocks
         const newTransaction = await Transaction.create({
             stock_id: stock_id,
-            share_quantity: share_quantity, // Negative for selling
-            stock_price: stock_price,
+            share_quantity: -share_quantity, // Negative for selling
+            stock_price: currentStockPrice,
             user_id: user_id,
             trade_timestamp: new Date(), // Sequelize automatically handles the current timestamp
         }, { transaction: t });
 
         // Credit the amount obtained from selling to the user's balance
-        console.log(Math.abs(share_quantity));
-        let totalCredit = Math.abs(share_quantity) * stock_price;
-        console.log(`Current balance before credit: ${user.balance}`);
-        console.log("totalCredit typeof: " + typeof totalCredit);
-        console.log("user balance typeof: " + typeof user.balance);
+        //console.log(Math.abs(share_quantity));
+        //let totalCredit = Math.abs(share_quantity) * stock_price;
+        //console.log(`Current balance before credit: ${user.balance}`);
+        //console.log("totalCredit typeof: " + typeof totalCredit);
+        //console.log("user balance typeof: " + typeof user.balance);
 
         // Convert balance to a number before performing arithmetic
         user.balance = parseFloat(user.balance); 
