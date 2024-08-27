@@ -1,5 +1,5 @@
 const express = require('express');
-const {getTotalInvestment, getTotalValuation, getAllStocks,  AddFundsUser, WithdrawFundsUser, getDates, calculateHistoricalWealth, getUserBalance, getStockPie}  = require("../scripts/DashboardScripts");
+const {getTotalInvestment, getTotalValuation, getAllStocks,  AddFundsUser, WithdrawFundsUser, getDates, calculateHistoricalWealth, getUserBalance, getStockPie, getSectorPie}  = require("../scripts/DashboardScripts");
 
 
 const router = express.Router();
@@ -95,6 +95,17 @@ router.get('/StockPie', async (req, res) => {
   } 
   catch (error) {
       res.status(500).json({ error: 'An error occurred fetching the top stocks.' });
+  }
+});
+
+router.get('/SectorPie', async (req, res) => {
+  try {
+      const userID = req.query.userId;
+      const topSectors = await getSectorPie(userID);
+      res.json(topSectors);
+  } 
+  catch (error) {
+      res.status(500).json({ error: 'An error occurred fetching the top sectors.' });
   }
 });
 

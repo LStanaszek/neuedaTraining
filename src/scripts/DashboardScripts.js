@@ -450,6 +450,88 @@ async function getStockPie(userID)
     }
 }
 
+async function getSectorPie(userID) 
+{
+    try {
+        // Fetch the current stock holdings for the user, along with sector information
+        const holdings = await Transaction.findAll({
+            attributes: [
+                'stock_id',
+                [sequelize.fn('SUM', sequelize.col('share_quantity')), 'totalShares']
+            ],
+            where: {
+                user_id: userID,
+            },
+            include: [
+                {
+                    model: Stock,
+                    attributes: ['ticker', 'stock_name', 'sector_id'], // Include stock details
+                    include: [
+                        {
+                            model: Sector,
+                            attributes: ['sector_name'], // Include sector details
+                        }
+                    ]
+                }
+            ],
+            group: ['stock_id'], // Group by stock_id
+        });
+
+        // Aggregate market value by sector
+        const sectorValuations = {};
+
+        await Promise.all(holdings.map(async (holding) => {
+            const totalShares = parseInt(holding.get('totalShares'), 10);
+            const { ticker } = holding.Stock;
+            const { sector_name } = holding.Stock.Sector;
+
+            // Get the current price from Finnhub using your existing getCurrentStockPrice function
+            const currentPrice = await getCurrentStockPrice(ticker);
+
+            // Calculate the market value
+            const marketValue = currentPrice * totalShares;
+
+            // Aggregate the market value by sector
+            if (sectorValuations[sector_name]) {
+                sectorValuations[sector_name] += marketValue;
+            } else {
+                sectorValuations[sector_name] = marketValue;
+            }
+        }));
+
+        const totalValuation = await getTotalValuation();
+
+        console.log('Total Valuation:', totalValuation);
+
+        // Convert sector valuations to an array and sort by market value in descending order
+        const sortedSectors = Object.entries(sectorValuations)
+            .sort(([, a], [, b]) => b - a); // Sort by market value descending
+
+        // Extract the top 4 sectors and calculate percentages
+        const topSectors = sortedSectors.slice(0, 4);
+        const otherSectors = sortedSectors.slice(4);
+
+        const sectorNames = topSectors.map(([sector]) => sector);
+        const percentages = topSectors.map(([, value]) => parseFloat((value / totalValuation) * 100).toFixed(2));
+
+        // Calculate the "Other" sector if there are more than 4 sectors
+        if (otherSectors.length > 0) {
+            const otherValuation = otherSectors.reduce((sum, [, value]) => sum + value, 0);
+            sectorNames.push('Other');
+            percentages.push(parseFloat((otherValuation / totalValuation) * 100).toFixed(2));
+        }
+
+        return {
+            sectorNames,
+            percentages,
+        };
+    } 
+    catch (error) {
+        console.error('Error fetching sector percentages by valuation:', error);
+        throw new Error('An error occurred while fetching the sector percentages by valuation.');
+    }
+}
+
 async function getUserBalance(userId) {
     try {
 
@@ -482,5 +564,6 @@ module.exports = {
     calculateHistoricalWealth,
     getDates,
     getStockPie,
+    getSectorPie,
     getUserBalance,
 }
