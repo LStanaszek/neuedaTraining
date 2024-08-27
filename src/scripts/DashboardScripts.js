@@ -376,6 +376,28 @@ async function calculateHistoricalWealth(userId, startDate, endDate) {
     }
 }
 
+async function getUserBalance(userId) {
+    try {
+
+        console.log(userId);
+        // Fetch the user from the database
+        const user = await User.findByPk(userId, {
+            attributes: ['balance']
+        });
+
+        // If user not found, throw an error
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Return the balance as an object
+        return { balance: user.balance };
+    } catch (error) {
+        console.error('Error fetching user balance:', error);
+        throw new Error('An error occurred while fetching the balance: ' + error.message);
+    }
+}
+
 module.exports = {
     getTotalInvestment,
     getTotalValuation,
@@ -385,4 +407,5 @@ module.exports = {
     getCurrentStockPrice,
     calculateHistoricalWealth,
     getDates,
+    getUserBalance,
 }

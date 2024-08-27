@@ -1,5 +1,5 @@
 const express = require('express');
-const {getTotalInvestment, getTotalValuation, getAllStocks,  AddFundsUser, WithdrawFundsUser, getDates, calculateHistoricalWealth}  = require("../scripts/DashboardScripts");
+const {getTotalInvestment, getTotalValuation, getAllStocks,  AddFundsUser, WithdrawFundsUser, getDates, calculateHistoricalWealth, getUserBalance}  = require("../scripts/DashboardScripts");
 
 const router = express.Router();
 
@@ -84,6 +84,22 @@ router.get("/GetPerformanceGraphData", async (req, res) => {
       res.status(500).json({ error: 'An error occurred getting graph data.' });
       console.error('Error getting graph data:', error);
     }
+});
+
+// GET route to fetch user balance by userId
+router.get('/Balance', async (req, res) => {
+  const userId = req.query.userId;
+
+  try {
+      // Call the getUserBalance function to fetch the balance
+      const balanceData = await getUserBalance(userId);
+
+      // Respond with the balance data
+      return res.status(200).json(balanceData);
+  } catch (error) {
+      // If an error occurs, respond with an error message
+      return res.status(500).json({ message: error.message });
+  }
 });
 
 module.exports = router;
