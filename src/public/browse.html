@@ -278,9 +278,15 @@
                 const watchlistData = await watchlistResponse.json();
                 const stockData = watchlistData.find(stock => stock.ticker === ticker);
 
-                modalTitle.innerHTML = `
-                    <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
-                    ${profile.name}(${profile.ticker})
+                
+                 // Update modal title with company logo, name, ticker, and Buy/Sell buttons
+                    modalTitle.innerHTML = `
+                     <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
+                     ${profile.name} (${profile.ticker})
+                    <div class="ms-auto">
+                        <button class="btn btn-success btn-sm me-2" id="buyButton">Buy</button>
+                        <button class="btn btn-danger btn-sm" id="sellButton">Sell</button>
+                    </div>
                 `;
 
 
@@ -296,10 +302,37 @@
 
                 const stockDetailModal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
                 stockDetailModal.show();
+
+                // Add event listeners for Buy and Sell buttons
+        document.getElementById('buyButton').addEventListener('click', function() {
+            showBuyModal(profile, stockData);
+        });
+
+        document.getElementById('sellButton').addEventListener('click', function() {
+            showSellModal(profile, stockData);
+        });
+
+
             } catch (error) {
                 modalDetailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
             }
         }
+
+        //show stock detail from search
+        function showStockDetailFromSearch() {
+    const ticker = document.getElementById('searchBox').value.trim();
+    
+    if (ticker) {
+        showStockDetail(ticker);
+    } else {
+        console.error('Search box is empty');
+    }
+    return false; // Prevent form submission
+}
+
+
+
+
 
         // Function to remove a stock from the watchlist
         async function removeFromWatchlist(watchID, buttonElement) {
@@ -324,6 +357,7 @@
         fetchAndDisplayTopLosers();
         fetchWatchlist();
         fetchSearchSuggestions();
+        showStockDetailFromSearch()
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
