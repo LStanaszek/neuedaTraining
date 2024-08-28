@@ -50,10 +50,16 @@ CREATE TABLE IF NOT EXISTS transactions (
 INSERT INTO sectors (sector_name)
 VALUES 
 ('Technology'),
-('Healthcare'),
-('Finance'),
+('Pharmaceuticals'),
+('Banking'),
+('Retail'),
+('Consumer products'),
 ('Energy'),
-('Consumer Goods');
+('Utilities'),
+('Aerospace & Defense'),
+('Chemicals'),
+('Real Estate'),
+('Media');
 
 INSERT INTO stocks (stock_name, ticker, sector_id, company_country, currency, exchanges, web_url)
 VALUES 
