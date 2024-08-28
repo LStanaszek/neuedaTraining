@@ -7,7 +7,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: c0nygre
       MYSQL_DATABASE: Portfolio_Management
-      MYSQL_USER: root
       MYSQL_PASSWORD: c0nygre
     volumes:
       - db_data:/var/lib/mysql
