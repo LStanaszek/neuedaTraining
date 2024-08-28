@@ -1,6 +1,6 @@
 //StockInfoAPI.js file
 const express = require('express');
-const {getCompanyProfile, searchSymbols}  = require("../scripts/StockInfoScript"); //check with Lukasz
+const {getCompanyProfile, searchSymbols}  = require("../scripts/StockInfoScript");
 
 const router = express.Router();
 

@@ -22,6 +22,16 @@ async function getCompanyProfile(ticker) {
         if (error) {
           return reject(error); // Reject the promise if there is an error
         }      
+
+        // Format marketCapitalization and shareOutstanding to two decimal places
+        if (data) {
+          if (data.marketCapitalization !== undefined) {
+            data.marketCapitalization = parseFloat(data.marketCapitalization).toFixed(2);
+          }
+          if (data.shareOutstanding !== undefined) {
+            data.shareOutstanding = parseFloat(data.shareOutstanding).toFixed(2);
+          }
+        }
           resolve(data); // Resolve the promise with the company data
       });
     });
@@ -66,5 +76,5 @@ async function searchSymbols(query) {
 
 module.exports = {
   getCompanyProfile,
-  searchSymbols
+  searchSymbols,
 }
