@@ -3,6 +3,7 @@ const { sequelize, Sector, Stock, Watchlist, User, Transaction } = require('../u
 const axios = require('axios');
 require('dotenv').config();
 const finnhub = require('finnhub');
+const yahooFinance = require('yahoo-finance2').default;
 
 // Function to get company profile data from Finnhub API
 async function getCompanyProfile(ticker) {
@@ -42,7 +43,31 @@ async function getCompanyProfile(ticker) {
   }
 }
 
+async function getPriceAndGrowth(ticker) {
+  try {
+      // Fetch the stock quote from Yahoo Finance
+      const quote = await yahooFinance.quote(ticker);
+
+      // Extract the current price and the previous day's close price
+      const currentPrice = quote.regularMarketPrice;
+      const previousClose = quote.regularMarketPreviousClose;
+
+      // Calculate the growth percentage
+      const growth = ((currentPrice - previousClose) / previousClose) * 100;
+
+      return {
+          ticker,
+          currentPrice,
+          growth: parseFloat(growth.toFixed(2)) // Round to 2 decimal places
+      };
+  } catch (error) {
+      console.error(`Error fetching stock price and growth for ${ticker}:`, error);
+      throw error;
+  }
+}
+
 // Export the getCompanyProfile function for use in other modules
 module.exports = {
   getCompanyProfile,
+  getPriceAndGrowth
 };

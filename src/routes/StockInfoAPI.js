@@ -1,7 +1,7 @@
 // Import necessary modules
 const express = require('express');
 const yahooFinance = require('yahoo-finance2').default;
-const { getCompanyProfile, searchSymbols } = require("../scripts/StockInfoScript");
+const { getCompanyProfile, getPriceAndGrowth } = require("../scripts/StockInfoScript");
 
 // Create a new Express router
 const router = express.Router();
@@ -51,6 +51,18 @@ router.get('/api/autocomplete', async (req, res) => {
     // Handle errors by sending a 500 status code and logging the error
     console.error('Error during autocomplete search:', error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/GetPriceAndGrowth', async (req, res) => {
+  try {
+    const ticker = req.query.ticker;
+    console.log(ticker);
+    const priceAndGrowth = await getPriceAndGrowth(ticker)
+    res.json({priceAndGrowth});
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while obtaining price and growth.' });
+    console.error('Error fetching price and growth:', error);
   }
 });
 
