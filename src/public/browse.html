@@ -1,3 +1,4 @@
+<!--/src/public/browse.html file-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,25 @@
     <title>InvestEd Browse</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
+                #suggestionsList .dropdown-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        #suggestionsList .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        #suggestionsList .dropdown-item strong {
+            color: #007bff;
+        }
+
+        #suggestionsList .dropdown-item span {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
         .badge-growth-positive {
             background-color: #d4edda; /* Light green */
             color: #155724; /* Dark green text */
@@ -21,6 +41,7 @@
 <body>
     <div id="navbar"></div>
     <h1></h1>
+    <div id="modal-container"></div> <!-- Placeholder for the modal -->
 
     <script>
         // Fetch the navigation bar
@@ -42,6 +63,18 @@
                     }
                 });
             });
+                  // Load the modal from modal.html
+        // Load the modal from modal.html into the modal-container div
+        fetch('./modal.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('modal-container').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error loading modal:', error);
+            });
+
+
 
         // Hard-coded fallback data
         const fallbackData = {
@@ -60,96 +93,194 @@
         };
 
         // Function to fetch and display top gainers
-        function fetchAndDisplayTopGainers() {
-            fetch('http://localhost:3000/Browse/top-gainers')
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    // Check if data is empty due to API call limit use previous snapshot
-                    if (Array.isArray(data) && data.length === 0) {
-                        populateStockList(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
-                    } else {
-                        populateStockList(data || fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching top gainers:', error);
-                    populateStockList(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
-                });
-        }
+function fetchAndDisplayTopGainers() {
+    fetch('http://localhost:3000/Browse/top-gainers')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (Array.isArray(data) && data.length === 0) {
+                populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+            } else {
+                populateStockListBackend(data || fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching top gainers:', error);
+            populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+        });
+}
 
-        // Function to fetch and display top losers
-        function fetchAndDisplayTopLosers() {
-            fetch('http://localhost:3000/Browse/top-losers')
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    // Check if data is empty due to API call limit use previous snapshot
-                    if (Array.isArray(data) && data.length === 0) {
-                        populateStockList(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
-                    } else {
-                        populateStockList(data || fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching top losers:', error);
-                    populateStockList(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
-                });
-        }
+// Function to fetch and display top losers
+function fetchAndDisplayTopLosers() {
+    fetch('http://localhost:3000/Browse/top-losers')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (Array.isArray(data) && data.length === 0) {
+                populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+            } else {
+                populateStockListBackend(data || fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching top losers:', error);
+            populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+        });
+}
 
         // Function to populate stock lists with styling based on growth
-        function populateStockList(stockList, mainListId, additionalListId) {
-            const mainList = document.getElementById(mainListId);
-            const additionalList = document.getElementById(additionalListId);
+        function populateStockListBackend(stockList, mainListId, additionalListId) {
+    const mainList = document.getElementById(mainListId);
+    const additionalList = document.getElementById(additionalListId);
 
-            stockList.forEach((item, index) => {
-                const name = item.name || "Unknown";
-                const ticker = item.ticker || "Unknown Ticker";
-                const currentPrice = item.current_price !== undefined ? `$${item.current_price}` : "N/A";
-                const growthToday = item.growth_today !== undefined ? `${item.growth_today}` : "N/A";
+    stockList.forEach((item, index) => {
+        let name = item.name || "Unknown";
+        const ticker = item.ticker || "Unknown Ticker";
+        const currentPrice = item.price !== undefined ? `$${item.price}` : "N/A";
+        
+        // Format the growth percentage to two decimal places
+        const growthToday = item.change_percentage !== undefined ? `${parseFloat(item.change_percentage).toFixed(2)}%` : "N/A";
 
-                // Determine class for growth
-                const growthValue = parseFloat(item.growth_today) || 0;
-                let growthClass = '';
-                if (growthValue > 0) {
-                    growthClass = 'badge-growth-positive'; // Green background for positive growth
-                } else if (growthValue < 0) {
-                    growthClass = 'badge-growth-negative'; // Red background for negative growth
-                }
-
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item';
-
-                listItem.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <span>${name} (${ticker})</span>
-                            <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                            <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                        </div>
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-outline-primary me-2">View Detail</button>
-                        </div>
-                    </div>
-                `;
-
-                if (index < 3) {
-                    mainList.appendChild(listItem);
-                } else {
-                    additionalList.appendChild(listItem);
-                }
-            });
+        // If the name is "Unknown Stock", use the ticker instead and capitalize it
+        if (name === "Unknown Stock") {
+            name = ticker.charAt(0).toUpperCase() + ticker.slice(1).toLowerCase();
         }
 
-        // Fetch and display data on page load
-        fetchAndDisplayTopGainers();
-        fetchAndDisplayTopLosers();
+        // Determine class for growth
+        const growthValue = parseFloat(item.change_amount) || 0;
+        let growthClass = '';
+        if (growthValue > 0) {
+            growthClass = 'badge-growth-positive'; // Green background for positive growth
+        } else if (growthValue < 0) {
+            growthClass = 'badge-growth-negative'; // Red background for negative growth
+        }
 
-        // Watchlist fetching logic
-        fetch('http://localhost:3000/Browse/watchlist')
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item';
+
+        listItem.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span>${name} (${ticker})</span>
+                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
+                </div>
+            </div>
+        `;
+
+        if (index < 3) {
+            mainList.appendChild(listItem);
+        } else {
+            additionalList.appendChild(listItem);
+        }
+    });
+}
+
+function populateStockListFallback(stockList, mainListId, additionalListId) {
+    const mainList = document.getElementById(mainListId);
+    const additionalList = document.getElementById(additionalListId);
+
+    stockList.forEach((item, index) => {
+        let name = item.name || "Unknown";
+        const ticker = item.ticker || "Unknown Ticker";
+        const currentPrice = item.current_price !== undefined ? `$${item.current_price}` : "N/A";
+        
+        // Format the growth percentage to two decimal places
+        const growthToday = item.growth_today !== undefined ? `${parseFloat(item.growth_today).toFixed(2)}` : "N/A";
+
+        // If the name is "Unknown Stock", use the ticker instead and capitalize it
+        if (name === "Unknown Stock") {
+            name = ticker.charAt(0).toUpperCase() + ticker.slice(1).toLowerCase();
+        }
+
+        // Determine class for growth
+        const growthValue = parseFloat(item.growth_today) || 0;
+        let growthClass = '';
+        if (growthValue > 0) {
+            growthClass = 'badge-growth-positive'; // Green background for positive growth
+        } else if (growthValue < 0) {
+            growthClass = 'badge-growth-negative'; // Red background for negative growth
+        }
+
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item';
+
+        listItem.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span>${name} (${ticker})</span>
+                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
+                </div>
+            </div>
+        `;
+
+        if (index < 3) {
+            mainList.appendChild(listItem);
+        } else {
+            additionalList.appendChild(listItem);
+        }
+    });
+}
+
+
+
+
+async function fetchSearchSuggestions() {
+    const query = document.getElementById('searchBox').value;
+
+    if (query.length < 2) {
+        document.getElementById('suggestionsList').style.display = 'none';
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        const suggestions = data;
+        const suggestionsList = document.getElementById('suggestionsList');
+
+        suggestionsList.innerHTML = ''; // Clear previous suggestions
+
+        if (suggestions.length > 0) {
+            // Filter out suggestions with undefined or invalid symbols and names
+            const validSuggestions = suggestions.filter(suggestion => 
+                suggestion.symbol && suggestion.symbol.trim() !== '' &&
+                suggestion.name && suggestion.name.trim() !== ''
+            );
+
+            if (validSuggestions.length > 0) {
+                validSuggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.classList.add('dropdown-item');
+                    li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name}`;
+                    li.onclick = () => {
+                        document.getElementById('searchBox').value = suggestion.symbol;
+                        document.getElementById('suggestionsList').style.display = 'none';
+                    };
+                    suggestionsList.appendChild(li);
+                });
+                suggestionsList.style.display = 'block';
+            } else {
+                suggestionsList.style.display = 'none';
+            }
+        } else {
+            suggestionsList.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching search suggestions:', error);
+        document.getElementById('suggestionsList').style.display = 'none';
+    }
+}
+
+
+
+         // Function to fetch and display the watchlist
+         async function fetchWatchlist() {
+            try {
+                const response = await fetch('http://localhost:3000/Browse/watchlist');
+                const data = await response.json();
                 const watchlistItems = document.getElementById('watchlistItems');
                 const additionalWatchlistItems = document.getElementById('additionalWatchlistItems');
 
@@ -179,7 +310,7 @@
                                 <span class="badge ${growthClass} ms-2">${growthToday}</span>
                             </div>
                             <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-primary me-2">View Detail</button>
+                                <button class="btn btn-sm btn-outline-primary me-2" type="button" onclick="showStockDetail('${ticker}')">View Detail</button>
                                 <button class="btn btn-sm btn-outline-danger" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
                             </div>
                         </div>
@@ -191,28 +322,74 @@
                         additionalWatchlistItems.appendChild(listItem);
                     }
                 });
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching watchlist:', error);
-            });
+            }
+        }
+
+        // Function to show stock details in the modal
+        async function showStockDetail(ticker) {
+            const modalDetailContent = document.getElementById('modalDetailContent');
+            const modalTitle = document.getElementById('stockDetailModalLabel');
+
+            try {
+                const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+                if (!profileResponse.ok) {
+                    throw new Error(`Failed to fetch company profile for ${ticker}`);
+                }
+                const profileData = await profileResponse.json();
+                const profile = profileData.CompanyInfo;
+
+                const watchlistResponse = await fetch('http://localhost:3000/Browse/watchlist');
+                const watchlistData = await watchlistResponse.json();
+                const stockData = watchlistData.find(stock => stock.ticker === ticker);
+
+                modalTitle.innerHTML = `
+                    <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
+                    ${profile.name}(${profile.ticker})
+                `;
+
+
+                modalDetailContent.innerHTML = `
+                    <p><strong>Current Price:</strong> $${stockData.current_price}</p>
+                    <p><strong>Growth Today:</strong> ${stockData.growth_today}%</p>
+                    <hr>
+                    <p><strong>Country:</strong> ${profile.country}</p>
+                    <p><strong>Exchange:</strong> ${profile.exchange}</p>
+                    <p><strong>Phone:</strong> ${profile.phone}</p>
+                    <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
+                `;
+
+                const stockDetailModal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
+                stockDetailModal.show();
+            } catch (error) {
+                modalDetailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
+            }
+        }
 
         // Function to remove a stock from the watchlist
-        function removeFromWatchlist(watchID, buttonElement) {
-            fetch(`http://localhost:3000/Browse/watchlist/delete?watchID=${watchID}`, {
-                method: 'DELETE',
-            })
-            .then(response => {
+        async function removeFromWatchlist(watchID, buttonElement) {
+            try {
+                const response = await fetch(`http://localhost:3000/Browse/watchlist/delete?watchID=${watchID}`, {
+                    method: 'DELETE',
+                });
+
                 if (response.ok) {
                     const listItem = buttonElement.closest('.list-group-item');
                     listItem.remove();
                 } else {
                     console.error('Failed to remove stock from watchlist');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error removing stock from watchlist:', error);
-            });
+            }
         }
+
+        // Fetch and display data on page load
+        fetchAndDisplayTopGainers();
+        fetchAndDisplayTopLosers();
+        fetchWatchlist();
+        fetchSearchSuggestions();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 

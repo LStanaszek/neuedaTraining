@@ -3,18 +3,32 @@
 const { sequelize, Sector, Stock, Watchlist, User, Transaction } = require('../utils/createDB')
 const axios = require('axios');
 require('dotenv').config();
+const { getCompanyProfile } = require("../scripts/StockInfoScript");
 const { getCurrentStockPrice } = require("../scripts/DashboardScripts");
 
 //Asynchronous function to buy stocks
-async function purchaseStocks(stock_id, share_quantity, user_id) {
+async function purchaseStocks(ticker, share_quantity, user_id) {
 
     const t = await sequelize.transaction();
 
     try {
         // Validate input data
-        if (!stock_id || share_quantity <= 0 || !user_id) {
+        if (!ticker || share_quantity <= 0 || !user_id) {
             throw new Error('All fields are required: stock_id, share_quantity <= 0, user_id');
         }
+
+        // Get the current stock price using the ticker symbol
+        const currentStockPrice = await getCurrentStockPrice(ticker);
+
+        if (!currentStockPrice) {
+            throw new Error(`Unable to retrieve current stock price for ticker ${ticker}`);
+        }
+
+        // Convert stock price to 2 decimal places
+        const formattedStockPrice = parseFloat(currentStockPrice).toFixed(2);
+
+        // Calculate the total cost of the stocks to be purchased
+        const totalCost = share_quantity * currentStockPrice;//use the current stock price - getCurrentStockPrice function
 
         // Find user
         const user = await User.findByPk(user_id, { transaction: t });
@@ -22,28 +36,51 @@ async function purchaseStocks(stock_id, share_quantity, user_id) {
             throw new Error('User not found');
         }
 
-        // Find stock
-        const stock = await Stock.findByPk(stock_id, { transaction: t });
+       // Check if the user has enough balance to cover the purchase
+       if (user.balance < totalCost) {
+        throw new Error('Insufficient balance to complete the purchase.');
+    }
+
+        // Check if the stock exists in the database
+        var stock = await Stock.findOne({ where: { ticker }, transaction: t });
+        console.log(stock);
+
+        // If stock doesn't exist, fetch data from the external API and create a new stock entry
         if (!stock) {
-            throw new Error('Stock not found');
+            const companyProfile = await getCompanyProfile(ticker);
+            if (!companyProfile) {
+                throw new Error(`Company profile for ticker ${ticker} not found`);
+            }
+
+            // Check if the sector exists, if not create it
+            var sector = await Sector.findOne({ where: { sector_name: companyProfile.finnhubIndustry }, transaction: t });
+            if (!sector) {
+                sector = await Sector.create({ sector_name: companyProfile.finnhubIndustry }, { transaction: t });
+            }
+
+            // Create new stock entry
+            stock = await Stock.create({
+                stock_name: companyProfile.name,
+                ticker: ticker,
+                sector_id: sector.dataValues.sector_id,
+                company_country: companyProfile.country,
+                currency: companyProfile.currency,
+                exchanges: companyProfile.exchange,
+                web_url: companyProfile.weburl
+            }, { transaction: t });
+
         }
+           
+        const stock_id = stock.dataValues.stock_id;
 
-        // Get the current stock price using the ticker symbol
-        const currentStockPrice = await getCurrentStockPrice(stock.ticker);
-
-        // Calculate the total cost of the stocks to be purchased
-        const totalCost = share_quantity * currentStockPrice;//use the current stock price - getCurrentStockPrice function
-
-        // Check if the user has enough balance to cover the purchase
-        if (user.balance < totalCost) {
-            throw new Error('Insufficient balance to complete the purchase.');
-        }
+        // Convert share quantity to 2 decimal places
+        const formattedShareQuantity = parseFloat(share_quantity).toFixed(2);
 
         // Create a new transaction for buying stocks
         const newTransaction = await Transaction.create({
             stock_id: stock_id,
-            share_quantity: share_quantity, // Positive for buying
-            stock_price: currentStockPrice,
+            share_quantity: formattedShareQuantity, // Positive for buying
+            stock_price: formattedStockPrice,
             user_id: user_id,
             trade_timestamp: new Date(), // Sequelize automatically handles the current timestamp
         }, { transaction: t });
@@ -96,12 +133,6 @@ async function sellStocks(stock_id, share_quantity, user_id) {
         });
 
         // Validate that the user has enough shares to sell
-        //if (totalSharesOwned + share_quantity < 0) { // share_quantity is negative for selling
-        //    console.log("You own a total of " + totalSharesOwned);
-        //    throw new Error('Insufficient shares to sell');
-        //}
-
-        // Validate that the user has enough shares to sell
         if (totalSharesOwned < share_quantity) { // Ensure enough shares are available for sale
             throw new Error('Insufficient shares to sell');
         }
@@ -109,24 +140,23 @@ async function sellStocks(stock_id, share_quantity, user_id) {
         // Get the current stock price using the ticker symbol
         const currentStockPrice = await getCurrentStockPrice(stock.ticker);
 
+        // Format the current stock price to 2 decimal places
+        const formattedStockPrice = parseFloat(currentStockPrice).toFixed(2);
+
+        // Format the share quantity to 2 decimal places
+        const formattedShareQuantity = parseFloat(share_quantity).toFixed(2);
+
         // Calculate the total credit from the shares sold
-        const totalCredit = share_quantity * currentStockPrice;
+        const totalCredit = formattedShareQuantity * formattedStockPrice;
 
         // Create a new transaction for selling stocks
         const newTransaction = await Transaction.create({
             stock_id: stock_id,
-            share_quantity: -share_quantity, // Negative for selling
-            stock_price: currentStockPrice,
+            share_quantity: -formattedShareQuantity, // Negative for selling
+            stock_price: formattedStockPrice,
             user_id: user_id,
             trade_timestamp: new Date(), // Sequelize automatically handles the current timestamp
         }, { transaction: t });
-
-        // Credit the amount obtained from selling to the user's balance
-        //console.log(Math.abs(share_quantity));
-        //let totalCredit = Math.abs(share_quantity) * stock_price;
-        //console.log(`Current balance before credit: ${user.balance}`);
-        //console.log("totalCredit typeof: " + typeof totalCredit);
-        //console.log("user balance typeof: " + typeof user.balance);
 
         // Convert balance to a number before performing arithmetic
         user.balance = parseFloat(user.balance); 
@@ -150,7 +180,36 @@ async function sellStocks(stock_id, share_quantity, user_id) {
     }
 }
 
+async function getShareAmount(userID, ticker)
+{
+    try {
+        // Find the stock ID associated with the passed ticker
+        const stock = await Stock.findOne({ where: { ticker } });
+        if (!stock) {
+            throw new Error('Stock not found');
+        }
+
+        const result = await Transaction.findOne({
+            attributes: [
+                [sequelize.fn('SUM', sequelize.col('share_quantity')), 'netShares']
+            ],
+            where: {
+                stock_id: stock.stock_id,
+            }
+        });
+
+        // If no transactions are found, netShares should be 0
+        const netShares = result.get('netShares') || 0;
+
+        return {ticker : parseFloat(parseInt(netShares, 10)).toFixed(2)};
+    }
+    catch (error) {
+        console.error('Error fetching stocks for passed ticker:', error);
+    }
+}
+
 module.exports = {
     purchaseStocks,
-    sellStocks
+    sellStocks,
+    getShareAmount
 }

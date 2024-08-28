@@ -34,7 +34,7 @@ async function getStockPriceData(ticker, interval, start, end) {
         //     });
         //     //return data;
         // }
-        console.log(data)
+        console.log(data.quotes)
         return data;
     } catch (error) {
         console.error('BrowseScript: Error fetching data:', error);

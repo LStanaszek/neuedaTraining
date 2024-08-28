@@ -13,6 +13,7 @@ const finnhub = require('finnhub');
 
 async function getCompanyProfile(ticker) {
   try {
+    console.log("ticker: " + typeof ticker);
     var api_key = finnhub.ApiClient.instance.authentications['api_key'];
     api_key.apiKey = "cr3j3dhr01ql234grkj0cr3j3dhr01ql234grkjg" //process.env.FINNHUB_API_KEY;
     const finnhubClient = new finnhub.DefaultApi()
@@ -21,6 +22,16 @@ async function getCompanyProfile(ticker) {
         if (error) {
           return reject(error); // Reject the promise if there is an error
         }      
+
+        // Format marketCapitalization and shareOutstanding to two decimal places
+        if (data) {
+          if (data.marketCapitalization !== undefined) {
+            data.marketCapitalization = parseFloat(data.marketCapitalization).toFixed(2);
+          }
+          if (data.shareOutstanding !== undefined) {
+            data.shareOutstanding = parseFloat(data.shareOutstanding).toFixed(2);
+          }
+        }
           resolve(data); // Resolve the promise with the company data
       });
     });
@@ -65,5 +76,5 @@ async function searchSymbols(query) {
 
 module.exports = {
   getCompanyProfile,
-  searchSymbols
+  searchSymbols,
 }
