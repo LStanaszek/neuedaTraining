@@ -13,6 +13,7 @@ function createPortfolioChart(canvasId, apiEndpoint, userId, title, selectorId, 
 }
 
 function initializeChart(ctx, data, title, selectorId, legend) {
+    const down = (ctx, value) => ctx.p0.parsed.y > ctx.p1.parsed.y ? value : undefined;
     const portfolioChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -20,14 +21,17 @@ function initializeChart(ctx, data, title, selectorId, legend) {
             datasets: [{
                 label: legend,
                 data: data.valuations,
-                borderWidth: 2
+                borderWidth: 2,
+                borderColor: 'rgb(75, 192, 192)',
+                segment: {borderColor: ctx => down(ctx, 'rgb(192,75,75)')}
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             fill: true,
-            backgroundColour: 'rgba(255, 99, 132, 0.2)',
+            // backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            radius: 1,
             plugins: {
                 title: {
                     display: true,

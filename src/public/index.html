@@ -16,6 +16,9 @@
             <h1 class="fw-bold">Dashboard</h1>
         </div>
 
+        <div id="addFundsContainer"></div>
+        <div id="drawFundsContainer"></div>
+
         <!-- PERFORMANCE INDICATORS -->
         <div class="container mt-4">
             <div class="row g-4">
@@ -51,6 +54,7 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
         </div>
 
@@ -115,30 +119,158 @@
 
         <!-- INSERT NAV BAR -->
         <script>
-            fetch('./navBar.html')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('navbar').innerHTML = data;
+            document.addEventListener('DOMContentLoaded', function() {
+                fetch('./navBar.html')
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('navbar').innerHTML = data;
+        
+                        // Highlight active button
+                        let currentPath = window.location.pathname.split('/').pop();
+                        if (currentPath === '') {
+                            currentPath = 'index.html';
+                        }
+        
+                        const navLinks = document.querySelectorAll('.nav-link');
+                        navLinks.forEach(link => {
+                            if (link.getAttribute('href') === currentPath) {
+                                link.classList.add('active');
+                                link.setAttribute('aria-current', 'page');
+                            } else {
+                                link.classList.remove('active');
+                                link.removeAttribute('aria-current');
+                            }
+                        });
+        
+                        // Handle Add Funds button click
+                        const addFundsButton = document.querySelector('.addFundsButton');
+                        if (addFundsButton) {
+                            addFundsButton.addEventListener('click', function (e) {
+                                e.preventDefault();
+        
+                                fetch('addFunds.html')
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        document.getElementById('addFundsContainer').innerHTML = data;
+                                        const addFundsModal = new bootstrap.Modal(document.getElementById('addFundsModal'));
+                                        addFundsModal.show();
+                                        
+                                        // Set up form submission handling
+                                        setupFundsForm("Add");
+                                    })
+                                    .catch(error => console.error('Error loading modal:', error));
+                            });
+                        }
 
-                    // HIGHLIGHT ACTIVE BUTTON
-                    let currentPath = window.location.pathname.split('/').pop();
-                    if (currentPath === '') {
-                        currentPath = 'index.html';
+                        // Handle Withdraw Funds button click
+                        const drawFundsButton = document.querySelector('.drawFundsButton');
+                        if (drawFundsButton) {
+                            drawFundsButton.addEventListener('click', function (e) {
+                                e.preventDefault();
+        
+                                fetch('drawFunds.html')
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        document.getElementById('drawFundsContainer').innerHTML = data;
+                                        const drawFundsModal = new bootstrap.Modal(document.getElementById('drawFundsModal'));
+                                        drawFundsModal.show();
+                                        
+                                        // Set up form submission handling
+                                        setupFundsForm("Withdraw", "fundsDrawAmount", "cardDrawNumber", "expiryDrawDate", "drawcvv");
+                                    })
+                                    .catch(error => console.error('Error loading modal:', error));
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching navbar:', error));
+        
+
+                    function setupFundsForm(choice, amount = "fundsAmount", inputCardNumber = "cardNumber", inputExpiryDate = "expiryDate", inputCvv = "cvv") {
+                        let formId, apiEndpoint, modalId, submitButtonSelector;
+
+                        if (choice === "Add") {
+                            formId = "addFundsForm";
+                            apiEndpoint = "./Dashboard/AddFunds";
+                            modalId = "addFundsModal";
+                            submitButtonSelector = ".addFundsConfirm";
+                        } else if (choice === "Withdraw") {
+                            formId = "drawFundsForm";
+                            apiEndpoint = "./Dashboard/WithdrawFunds";
+                            modalId = "drawFundsModal";
+                            submitButtonSelector = ".drawFundsConfirm";
+                        }
+
+                        // Get the form element and replace it with a clone to remove old event listeners
+                        const fundsForm = document.getElementById(formId);
+                        if (!fundsForm) {
+                            console.error(`${choice} Funds Form not found`);
+                            return;
+                        }
+
+                        const clonedFundsForm = fundsForm.cloneNode(true); // Clone the form to reset listeners
+                        fundsForm.replaceWith(clonedFundsForm); // Replace the old form with the new cloned form
+
+                        // Add a new event listener to the cloned form
+                        clonedFundsForm.addEventListener('submit', function (e) {
+                            e.preventDefault();
+
+                            const fundsAmount = parseFloat(document.getElementById(amount).value); // Convert to float
+                            const cardNumber = document.getElementById(inputCardNumber).value;
+                            const expiryDate = document.getElementById(inputExpiryDate).value;
+                            const cvv = document.getElementById(inputCvv).value;
+
+                            if (isNaN(fundsAmount) || cardNumber === '' || expiryDate === '' || cvv === '') {
+                                alert('Please fill out all fields correctly');
+                                return;
+                            }
+
+
+                            fetch(apiEndpoint, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    user_id: 1,
+                                    amount: fundsAmount // Pass as a number
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const roundedBalance = parseFloat(data.user.balance).toFixed(2);
+                                document.getElementById('freeCash').textContent = `$${parseFloat(roundedBalance).toLocaleString()}`;
+                                const fundsModal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                                if (fundsModal) {
+                                    fundsModal.hide();
+                                }
+                            })
+                            .catch(error => {
+                                alert('Insufficient funds');
+                            });
+                        });
+
+                        // Add submit button functionality
+                        const fundsConfirmButton = document.querySelector(submitButtonSelector);
+                        if (fundsConfirmButton) {
+                            fundsConfirmButton.addEventListener('click', function () {
+                                clonedFundsForm.dispatchEvent(new Event('submit')); // Trigger the form submission programmatically
+                            });
+                        }
                     }
 
-                    const navLinks = document.querySelectorAll('.nav-link');
-                    navLinks.forEach(link => {
-                        if (link.getAttribute('href') === currentPath) {
-                            link.classList.add('active');
-                            link.setAttribute('aria-current', 'page');
-                        } else {
-                            link.classList.remove('active');
-                            link.removeAttribute('aria-current');
-                        }
-                    });
-                });
+                    
+                    
+        
+                // Fetch and display the free cash balance
+                fetch('./Dashboard/Balance?userId=1')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('freeCash').textContent = `$${data.balance.toLocaleString()}`;
+                    })
+                    .catch(error => console.error('Error fetching balance data:', error));
+            });
         </script>
-
+        
 
         <!-- FETCH PERFORMANCE STATS -->
         <script>
@@ -227,75 +359,63 @@
         </script>
         
 
-        <!-- STOCK PIE CHARTS -->
+        <!-- STOCK AND SECTORS PIE CHARTS -->
 
         <script>
-            const stockPieData = {
-                labels: ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'Other'],
-                datasets: [{
-                    data: [30, 25, 20, 15, 10]
-                }]
-            };
-        
-            const stockPieCtx = document.getElementById('stockPieChart').getContext('2d');
-            const stockPieChart = new Chart(stockPieCtx, {
-                type: 'doughnut',
-                data: stockPieData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Your Top Stocks',
-                            font: {
-                                size: 15
+            function createPieChart(ctx, data, title, option) {
+                let pieLabels;
+                if (option === 'stock'){
+                    pieLabels = data.stockNames;
+                }
+                else{
+                    pieLabels = data.sectorNames;
+                }
+                pieData = {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: data.percentages
+                    }]
+                };
+                const pieChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: pieData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: title,
+                                font: {
+                                    size: 15
+                                }
+                            },
+                            legend: {
+                                display: true,
+                                position: 'bottom'
                             }
-                        },
-                        legend: {
-                            display: true,
-                            position: 'bottom'
                         }
                     }
-                }
-            });
-        </script>
-        
-        <!-- SECTOR PIE CHART -->
-        <script>
-            const sectorData = {
-                labels: ['Technology', 'Healthcare', 'Finance', 'Energy', 'Other'],
-                datasets: [{
-                    data: [40, 30, 15, 10, 5]
-                }]
+                });
             };
-        
-            const sectorPieCtx = document.getElementById('sectorPieChart').getContext('2d');
-            const sectorPieChart = new Chart(sectorPieCtx, {
-                type: 'doughnut',
-                data: sectorData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Your Portfolio Sectors',
-                            font: {
-                                size: 15
-                            }
-                        },
-                        legend: {
-                            display: true,
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+
+            fetch('./Dashboard/StockPie?userId=1')
+                .then(response => response.json())
+                .then(data => {
+                    const stockPieCtx = document.getElementById('stockPieChart').getContext('2d');
+                    createPieChart(stockPieCtx, data, 'Your Portfolio Stocks', "stock");
+                })
+                .catch(error => console.error('Error fetching stock pie chart data:', error));
+
+            fetch('./Dashboard/SectorPie?userId=1')
+                .then(response => response.json())
+                .then(data => {
+                    const sectorPieCtx = document.getElementById('sectorPieChart').getContext('2d');
+                    createPieChart(sectorPieCtx, data, 'Your Portfolio Sectors', "sector");
+                })
+                .catch(error => console.error('Error fetching sector pie chart data:', error));
+
         </script>
-        
-        
-        
         
 
 
