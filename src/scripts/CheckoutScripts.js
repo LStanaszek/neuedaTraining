@@ -1,14 +1,13 @@
-//CheckoutScript.js file
-
+// Import necessary modules and models
 const { sequelize, Sector, Stock, Watchlist, User, Transaction } = require('../utils/createDB')
 const axios = require('axios');
 require('dotenv').config();
 const { getCompanyProfile } = require("../scripts/StockInfoScript");
 const { getCurrentStockPrice } = require("../scripts/DashboardScripts");
 
-//Asynchronous function to buy stocks
+// Function to buy purchase stocks
 async function purchaseStocks(ticker, share_quantity, user_id) {
-
+    // Start a new transaction
     const t = await sequelize.transaction();
 
     try {
@@ -19,7 +18,6 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
 
         // Get the current stock price using the ticker symbol
         const currentStockPrice = await getCurrentStockPrice(ticker);
-
         if (!currentStockPrice) {
             throw new Error(`Unable to retrieve current stock price for ticker ${ticker}`);
         }
@@ -28,24 +26,24 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
         const formattedStockPrice = parseFloat(currentStockPrice).toFixed(2);
 
         // Calculate the total cost of the stocks to be purchased
-        const totalCost = share_quantity * currentStockPrice;//use the current stock price - getCurrentStockPrice function
+        const totalCost = share_quantity * currentStockPrice;
 
-        // Find user
+        // Find the user by their ID
         const user = await User.findByPk(user_id, { transaction: t });
         if (!user) {
             throw new Error('User not found');
         }
 
-       // Check if the user has enough balance to cover the purchase
-       if (user.balance < totalCost) {
-        throw new Error('Insufficient balance to complete the purchase.');
-    }
+        // Check if the user has enough balance to complete the purchase
+        if (user.balance < totalCost) {
+            throw new Error('Insufficient balance to complete the purchase.');
+        }
 
         // Check if the stock exists in the database
         var stock = await Stock.findOne({ where: { ticker }, transaction: t });
         console.log(stock);
 
-        // If stock doesn't exist, fetch data from the external API and create a new stock entry
+        // If the stock doesn't exist, fetch data from the external API and create a new stock entry
         if (!stock) {
             const companyProfile = await getCompanyProfile(ticker);
             if (!companyProfile) {
@@ -70,7 +68,7 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
             }, { transaction: t });
 
         }
-           
+
         const stock_id = stock.dataValues.stock_id;
 
         // Convert share quantity to 2 decimal places
@@ -79,7 +77,7 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
         // Create a new transaction for buying stocks
         const newTransaction = await Transaction.create({
             stock_id: stock_id,
-            share_quantity: formattedShareQuantity, // Positive for buying
+            share_quantity: formattedShareQuantity,
             stock_price: formattedStockPrice,
             user_id: user_id,
             trade_timestamp: new Date(), // Sequelize automatically handles the current timestamp
@@ -87,12 +85,13 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
 
         // Deduct the total cost from the user's balance
         user.balance -= totalCost;
-        
         await user.save({ transaction: t });
 
+        // Commit the transaction
         await t.commit();
 
-        return newTransaction; // Return the new transaction object
+        // Return the new transaction object
+        return newTransaction;
 
     } catch (error) {
         // Rollback the transaction in case of error
@@ -102,10 +101,10 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
     }
 }
 
-//Asynchronous function to sell stocks
+// Function to sell stocks
 async function sellStocks(ticker, share_quantity, user_id) {
 
-    // Start a transaction
+    // Start a new transaction
     const t = await sequelize.transaction();
 
     try {
@@ -114,7 +113,7 @@ async function sellStocks(ticker, share_quantity, user_id) {
             throw new Error('All fields are required: ticker, share_quantity <= 0, user_id');
         }
 
-        // Find user
+        // Find the user by their ID
         const user = await User.findByPk(user_id, { transaction: t });
         if (!user) {
             throw new Error('User not found');
@@ -161,14 +160,16 @@ async function sellStocks(ticker, share_quantity, user_id) {
         }, { transaction: t });
 
         // Convert balance to a number before performing arithmetic
-        user.balance = parseFloat(user.balance); 
+        user.balance = parseFloat(user.balance);
 
+        // Add the total credit to the user's balance
         user.balance += totalCredit;
         console.log(`New balance to be saved: ${user.balance}`);
 
         await user.save({ transaction: t });
         console.log('User balance updated successfully. Committing transaction...');
 
+        // Commit the transaction
         await t.commit();
         console.log('Transaction committed successfully.');
 
@@ -182,8 +183,8 @@ async function sellStocks(ticker, share_quantity, user_id) {
     }
 }
 
-async function getShareAmount(userID, ticker)
-{
+// Function to get the total share amount of a stock for a user
+async function getShareAmount(userID, ticker) {
     try {
         // Find the stock ID associated with the passed ticker
         const stock = await Stock.findOne({ where: { ticker } });
@@ -191,6 +192,7 @@ async function getShareAmount(userID, ticker)
             throw new Error('Stock not found');
         }
 
+        // Sum the total share quantity for the user and stock
         const result = await Transaction.findOne({
             attributes: [
                 [sequelize.fn('SUM', sequelize.col('share_quantity')), 'netShares']
@@ -203,13 +205,14 @@ async function getShareAmount(userID, ticker)
         // If no transactions are found, netShares should be 0
         const netShares = result.get('netShares') || 0;
 
-        return {ticker : parseFloat(parseInt(netShares, 10)).toFixed(2)};
+        return { ticker: parseFloat(parseInt(netShares, 10)).toFixed(2) };
     }
     catch (error) {
         console.error('Error fetching stocks for passed ticker:', error);
     }
 }
 
+// Export the functions for use in other modules
 module.exports = {
     purchaseStocks,
     sellStocks,
