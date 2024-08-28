@@ -1,16 +1,16 @@
 //CheckoutAPI.js file
 const express = require('express');
-const { purchaseStocks, sellStocks } = require("../scripts/CheckoutScripts");
+const { purchaseStocks, sellStocks, getShareAmount } = require("../scripts/CheckoutScripts");
 
 const router = express.Router();
 
 // Endpoint to handle stock purchases
 router.post('/BuyStocks', async (req, res) => {
-    const { stock_id, share_quantity, user_id } = req.body;
+    const { ticker, share_quantity, user_id } = req.body;
 
     try {
         // Call the function to add stock purchase
-        const transaction = await purchaseStocks(stock_id, share_quantity, user_id);
+        const transaction = await purchaseStocks(ticker, share_quantity, user_id);
         res.status(201).json({
             message: 'Stock purchase recorded successfully',
             transaction,
@@ -35,5 +35,18 @@ router.post('/SellStocks', async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+
+router.get('/GetShareAmount', async (req, res) => {
+    try {
+        const userID = req.query.userId;
+        const ticker = req.query.ticker;
+
+        const shareCount = await getShareAmount(userID, ticker);
+        res.json(shareCount);
+    } 
+    catch (error) {
+        res.status(500).json({ error: 'An error occurred fetching the top stocks.' });
+    }
+  });
 
 module.exports = router;

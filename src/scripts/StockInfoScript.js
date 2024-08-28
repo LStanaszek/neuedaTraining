@@ -13,6 +13,7 @@ const finnhub = require('finnhub');
 
 async function getCompanyProfile(ticker) {
   try {
+    console.log("ticker: " + typeof ticker);
     var api_key = finnhub.ApiClient.instance.authentications['api_key'];
     api_key.apiKey = "cr3j3dhr01ql234grkj0cr3j3dhr01ql234grkjg" //process.env.FINNHUB_API_KEY;
     const finnhubClient = new finnhub.DefaultApi()

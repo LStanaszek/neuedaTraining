@@ -16,8 +16,6 @@ CREATE TABLE IF NOT EXISTS stocks (
     stock_name VARCHAR(255) NOT NULL,
     ticker VARCHAR(10) NOT NULL UNIQUE,
     sector_id INTEGER NOT NULL,
-    num_employees INTEGER NOT NULL,
-    -- tbd for other info
     company_country VARCHAR(255) NOT NULL,
     currency VARCHAR(10) NOT NULL,
     exchanges VARCHAR(255) NOT NULL,
@@ -57,14 +55,14 @@ VALUES
 ('Energy'),
 ('Consumer Goods');
 
-INSERT INTO stocks (stock_name, ticker, sector_id, num_employees, company_country, exchanges, currency, web_url)
+INSERT INTO stocks (stock_name, ticker, sector_id, company_country, currency, exchanges, web_url)
 VALUES 
-('Apple Inc.', 'AAPL', 1, 147000, 'USA', 'USD', 'NASDAQ', 'https://www.apple.com'),
-('Microsoft Corp.', 'MSFT', 1, 181000, 'USA', 'USD', 'NASDAQ', 'https://www.microsoft.com'),
-('Pfizer Inc.', 'PFE', 2, 78000, 'USA', 'USD', 'NYSE', 'https://www.pfizer.com'),
-('JP Morgan Chase', 'JPM', 3, 255351, 'USA', 'USD', 'NYSE', 'https://www.jpmorganchase.com'),
-('Exxon Mobil', 'XOM', 4, 63000, 'USA', 'USD', 'NYSE', 'https://corporate.exxonmobil.com'),
-('Procter & Gamble', 'PG', 5, 101000, 'USA', 'USD', 'NYSE', 'https://www.pg.com');
+('Apple Inc.', 'AAPL', 1, 'USA', 'USD', 'NASDAQ', 'https://www.apple.com'),
+('Microsoft Corp.', 'MSFT', 1, 'USA', 'USD', 'NASDAQ', 'https://www.microsoft.com'),
+('Pfizer Inc.', 'PFE', 2, 'USA', 'USD', 'NYSE', 'https://www.pfizer.com'),
+('JP Morgan Chase', 'JPM', 3, 'USA', 'USD', 'NYSE', 'https://www.jpmorganchase.com'),
+('Exxon Mobil', 'XOM', 4, 'USA', 'USD', 'NYSE', 'https://corporate.exxonmobil.com'),
+('Procter & Gamble', 'PG', 5, 'USA', 'USD', 'NYSE', 'https://www.pg.com');
 
 INSERT INTO watchlist (stock_id)
 VALUES 
