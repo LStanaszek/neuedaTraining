@@ -1,4 +1,4 @@
-//BrowseScripts.js file
+// Import necessary modules and models
 const axios = require('axios');
 require('dotenv').config();
 const yahooFinance = require('yahoo-finance2').default;
@@ -7,39 +7,23 @@ const { Watchlist, Stock } = require('../utils/createDB');
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 
+// Function to get the stock daily data
 async function getStockPriceData(ticker, interval, start, end) {
     try {
-        //let data;
         const intradayIntervals = ['1m', '2m', '5m', '15m', '30m', '60m', '1d', '1mo', 'max'];
         const data = await yahooFinance.chart(ticker, {
             interval,
             period1: start,
             period2: end,
         });
-
-        // if (intradayIntervals.includes(interval)) {
-        //     // Use the 'chart' module if intraday intervals
-        //     data = await yahooFinance.chart(ticker, {
-        //         interval,
-        //         period1: start,
-        //         period2: end,
-        //     });
-        //     //return data;
-        // } else {
-        //     // Use the 'historical' module if interval larger than a day
-        //     data = await yahooFinance.historical(ticker, {
-        //         period1: start,
-        //         period2: end,
-        //         interval,
-        //     });
-        //     //return data;
-        // }
         console.log(data)
         return data;
     } catch (error) {
         console.error('BrowseScript: Error fetching data:', error);
     }
 };
+
+
 async function getStockDatesPrices(ticker, interval, start, end) {
     try {
         const data = await yahooFinance.chart(ticker, {
@@ -69,7 +53,7 @@ async function getStockDatesPrices(ticker, interval, start, end) {
         // Iterate over the date range and fill in missing dates
         let currentDate = new Date(start);
         const endDate = new Date(end);
-        
+
         while (currentDate <= endDate) {
             const formattedDate = currentDate.toISOString().split('T')[0];
             if (dataMap.has(formattedDate)) {
@@ -93,8 +77,7 @@ async function getStockDatesPrices(ticker, interval, start, end) {
     }
 }
 
-
-
+// Function for the user's watchlist
 async function getWatchlist() {
     try {
         const watchlist = await Watchlist.findAll({
@@ -130,7 +113,8 @@ async function getWatchlist() {
     }
 };
 
-async function deleteStockFromWatchlist(watchID){
+// Function to delete stocks from the user's watchlist
+async function deleteStockFromWatchlist(watchID) {
     try {
         await Watchlist.destroy({
             where: {
@@ -144,6 +128,7 @@ async function deleteStockFromWatchlist(watchID){
     }
 };
 
+// Function to add stocks for the user's watchlist
 async function addStockToWatchlist(stockID) {
     try {
         const existsInWL = await Watchlist.findOne({
@@ -172,6 +157,7 @@ async function addStockToWatchlist(stockID) {
     }
 };
 
+// Function to obtain the stock name from a ticker
 async function getStockName(ticker) {
     try {
         const response = await axios.get(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_API_KEY}`);
@@ -187,6 +173,7 @@ async function getStockName(ticker) {
     }
 }
 
+// Function for Top gainers
 async function getTopGainers() {
     try {
         const url = `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${ALPHA_VANTAGE_API_KEY}`;
@@ -213,6 +200,7 @@ async function getTopGainers() {
     }
 }
 
+// Function for top losers
 async function getTopLosers() {
     try {
         const url = `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${ALPHA_VANTAGE_API_KEY}`;
@@ -239,6 +227,7 @@ async function getTopLosers() {
     }
 }
 
+// Export the functions for use in other modules
 module.exports = {
     getStockPriceData,
     getWatchlist,

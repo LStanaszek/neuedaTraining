@@ -1,24 +1,25 @@
-//BroweAPI.js file
+// Import necessary modules
 const express = require('express');
 require('dotenv').config();
 const yahooFinance = require('yahoo-finance2').default;
 const { Watchlist, Stock } = require('../utils/createDB');
-const { 
-    getStockPriceData, 
-    getWatchlist, 
-    deleteStockFromWatchlist, 
+const {
+    getStockPriceData,
+    getWatchlist,
+    deleteStockFromWatchlist,
     addStockToWatchlist,
     getTopGainers,
     getTopLosers,
-    getStockDatesPrices 
+    getStockDatesPrices
 } = require('../scripts/BrowseScripts');
 const { getDates } = require('../scripts/DashboardScripts');
 
+// Create a new Express router
 const router = express.Router();
 
-/***************************************** Browse endpoints ********************************/
+// Individual routes
 
-//GET historical data from external API given stock ticker and invertal of closing price for intervals 1m, 60m,.. 1mo
+//Route to get historical data from external API given stock ticker and interval of closing price for intervals 1m, 60m,.. 1mo
 router.get('/Historical', async (req, res) => {
     // timeframe key=> 0:1W , 1:1mo 2:6mo, 3:1y, 
     const { ticker, timeframe } = req.query;
@@ -37,6 +38,7 @@ router.get('/Historical', async (req, res) => {
     }
 });
 
+// Route to get stock historical prices
 router.get('/HistoricalDatesPrices', async (req, res) => {
     // timeframe key=> 0:1W , 1:1mo 2:6mo, 3:1y, 
     const { ticker, timeframe } = req.query;
@@ -55,7 +57,7 @@ router.get('/HistoricalDatesPrices', async (req, res) => {
     }
 });
 
-// GET list of stocks in Watchlist table
+// Route to list of stocks in Watchlist table
 router.get('/watchlist', async (req, res) => {
     try {
         const watchlist = await getWatchlist();
@@ -66,19 +68,19 @@ router.get('/watchlist', async (req, res) => {
     }
 });
 
-// DELETE a stock from the Watchlist table
+// Route to DELETE a stock from the Watchlist table
 router.delete('/watchlist/delete', async (req, res) => {
     try {
         const watchID = req.query.watchID
         await deleteStockFromWatchlist(watchID);
-        res.status(200).json({message: `Successfully deleted WatchID: ${watchID}`});
+        res.status(200).json({ message: `Successfully deleted WatchID: ${watchID}` });
     } catch (error) {
         console.error('Error deleting stock from watchlist:', error);
         res.status(500).json({ error: 'An error occurred while deleting stock from watchlist.' });
     }
 });
 
-// POST add a stock to the Watchlist table
+// Route to POST add a stock to the Watchlist table
 
 router.post('/watchlist/add', async (req, res) => {
     try {
@@ -102,7 +104,7 @@ router.post('/watchlist/add', async (req, res) => {
     }
 });
 
-// GET list of Top Gainers from external API
+// Route to GET a list of Top Gainers from external API
 router.get('/top-gainers', async (req, res) => {
     try {
         const topGainers = await getTopGainers(); // Implement this function in BrowseScripts.js
@@ -113,7 +115,7 @@ router.get('/top-gainers', async (req, res) => {
     }
 });
 
-// GET list of Top Losers from external API
+// Route to GET a list of Top Losers from external API
 router.get('/top-losers', async (req, res) => {
     try {
         const topLosers = await getTopLosers(); // Implement this function in BrowseScripts.js
@@ -124,4 +126,5 @@ router.get('/top-losers', async (req, res) => {
     }
 });
 
+// Export the router to be used in other parts of the application
 module.exports = router;

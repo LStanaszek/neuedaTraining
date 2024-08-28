@@ -1,44 +1,31 @@
-const {sequelize, Sector, Stock, Watchlist, User, Transaction} = require('../utils/createDB');
+// Import necessary modules and models
+const { sequelize, Sector, Stock, Watchlist, User, Transaction } = require('../utils/createDB');
 const axios = require("axios");
 require("dotenv").config();
 const finnhub = require('finnhub');
 const { Op } = require('sequelize');
 const yahooFinance = require('yahoo-finance2').default;
 
+// Function that retrieves the total value of all transactions
 async function getTotalInvestment() {
     try {
         const result = await Transaction.findOne({
-        attributes: [
-        [sequelize.fn('SUM', sequelize.literal('share_quantity * stock_price')), 'totalValue']
-        ]
+            attributes: [
+                [sequelize.fn('SUM', sequelize.literal('share_quantity * stock_price')), 'totalValue']
+            ]
         });
-  
+
         console.log('Total Value:', result.get('totalValue'));
         return parseFloat(result.get('totalValue')).toFixed(2);
-    } 
+    }
     catch (error) {
         console.error('Error fetching sum of product:', error);
     }
 }
 
+// Function that retrieves the current stock price for a given ticker symbol
 async function getCurrentStockPrice(ticker) {
     try {
-        /*
-        var api_key = finnhub.ApiClient.instance.authentications['api_key'];
-        api_key.apiKey = process.env.FINNHUB_API_KEY_3;
-        const finnhubClient = new finnhub.DefaultApi()
-
-        return new Promise((resolve, reject) => {
-            finnhubClient.quote(ticker, (error, data, response) => {
-                if (error) {
-                    return reject(error);  // Reject the promise if there is an error
-                }
-    
-                const latestPrice = data.c;  // 'c' is the current price from Finnhub's response
-                resolve(latestPrice);  // Resolve the promise with the latest price
-            });
-        });
-        */
 
         const quote = await yahooFinance.quote(ticker);
 
@@ -48,118 +35,114 @@ async function getCurrentStockPrice(ticker) {
         return latestPrice;
 
     } catch (error) {
-      console.error(`Error fetching stock price for ${ticker}:`, error);
-      throw error;
+        console.error(`Error fetching stock price for ${ticker}:`, error);
+        throw error;
     }
-  }
-  
+}
 
+
+// Function that calculates the total valuation of the user's portfolio
 async function getTotalValuation() {
     try {
 
         const transactions = await Transaction.findAll({
-        include: [
-            {
-            model: Stock,
-            attributes: ["ticker"],
-            },
-        ],
+            include: [
+                {
+                    model: Stock,
+                    attributes: ["ticker"],
+                },
+            ],
         });
-  
+
         let totalValue = 0;
 
-        // Calculate the total portfolio value
+        // Calculate total portfolio value by summing up the value of each transaction
         for (const transaction of transactions) {
             const { share_quantity, Stock } = transaction;
             const { ticker } = Stock;
             const stockPrice = await getCurrentStockPrice(ticker);
-            //console.log(`price : ${stockPrice}`);
             totalValue += stockPrice * share_quantity;
         }
 
-        //console.log('Total Value:', totalValue);
         return parseFloat(totalValue).toFixed(2);
-    } 
+    }
     catch (error) {
         console.error('Error fetching sum of product:', error);
     }
 }
 
-/**
- * Adds funds to a user's balance.
- * @param {number} userId - The ID of the user.
- * @param {number} amount - The amount to add to the user's balance.
- * @returns {Promise<object>} - A promise that resolves to the updated user object or an error message.
- */
 
+// Function that adds funds to a user's balance.
 async function AddFundsUser(userId, amount) {
-    // Validate input
+    // Validate input data
     if (!userId || typeof amount !== 'number' || amount <= 0) {
-      throw new Error('Invalid input');
+        throw new Error('Invalid input');
     }
-  
-    try {
-      // Perform the update operation using Sequelize's update method
-      const [updatedRowsCount] = await User.update(
-        { balance: sequelize.literal(`balance + ${amount}`) }, // Use sequelize.literal to perform a calculation in SQL
-        { where: { user_id: userId } }
-      );
-  
-      if (updatedRowsCount === 0) {
-        throw new Error('User not found or no change in balance');
-      }
-  
-      // Fetch the updated user to return the updated data
-      const updatedUser = await User.findByPk(userId);
-  
-      return { message: 'Funds added successfully', user: updatedUser };
-    } catch (error) {
-      console.error('Error updating user balance:', error);
-      throw new Error('Error updating user balance: ' + error.message);
-    }
-  }
 
-  async function WithdrawFundsUser(userId, amount) {
-    // Validate input
+    try {
+        // Perform the update operation using sequelize's update method
+        const [updatedRowsCount] = await User.update(
+            { balance: sequelize.literal(`balance + ${amount}`) }, // Use sequelize.literal to perform a calculation in SQL
+            { where: { user_id: userId } }
+        );
+
+        if (updatedRowsCount === 0) {
+            throw new Error('User not found or no change in balance');
+        }
+
+        // Fetch the updated user to return the updated data
+        const updatedUser = await User.findByPk(userId);
+
+        return { message: 'Funds added successfully', user: updatedUser };
+    } catch (error) {
+        console.error('Error updating user balance:', error);
+        throw new Error('Error updating user balance: ' + error.message);
+    }
+}
+
+// Function that withdraws funds from a user's balance.
+async function WithdrawFundsUser(userId, amount) {
+    // Validate input data
     if (!userId || typeof amount !== 'number' || amount <= 0) {
-      throw new Error('Invalid input');
+        throw new Error('Invalid input');
     }
-  
-    try {
-      // Find the user by user_id
-      const user = await User.findByPk(userId);
-  
-      if (!user) {
-        throw new Error('User not found');
-      }
-  
-      // Check if the user has sufficient funds
-      if (user.balance < amount) {
-        throw new Error('Insufficient funds');
-      }
-  
-      // Perform the update operation using Sequelize's update method
-      const [updatedRowsCount] = await User.update(
-        { balance: sequelize.literal(`balance - ${amount}`) }, // Use sequelize.literal to perform a calculation in SQL
-        { where: { user_id: userId } }
-      );
-  
-      if (updatedRowsCount === 0) {
-        throw new Error('Failed to withdraw funds');
-      }
-  
-      // Fetch the updated user to return the updated data
-      const updatedUser = await User.findByPk(userId);
-  
-      return { message: 'Funds withdrawn successfully', user: updatedUser };
-    } catch (error) {
-      console.error('Error withdrawing funds:', error);
-      throw new Error('Error withdrawing funds: ' + error.message);
-    }
-  }
 
-async function getAllStocks(userId, date, flag=0)
-{
+    try {
+        // Find the user by user_id
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Check if the user has sufficient funds
+        if (user.balance < amount) {
+            throw new Error('Insufficient funds');
+        }
+
+        // Perform the update operation using Sequelize's update method
+        const [updatedRowsCount] = await User.update(
+            { balance: sequelize.literal(`balance - ${amount}`) }, // Use sequelize.literal to perform a calculation in SQL
+            { where: { user_id: userId } }
+        );
+
+        if (updatedRowsCount === 0) {
+            throw new Error('Failed to withdraw funds');
+        }
+
+        // Fetch the updated user to return the updated data
+        const updatedUser = await User.findByPk(userId);
+
+        return { message: 'Funds withdrawn successfully', user: updatedUser };
+    } catch (error) {
+        console.error('Error withdrawing funds:', error);
+        throw new Error('Error withdrawing funds: ' + error.message);
+    }
+}
+
+
+// Function that retrieves all stocks in the user's portfolio with their current or historical value.
+async function getAllStocks(userId, date, flag = 0) {
     try {
         // Fetch sum of shares owned per stock up to the input date
         const holdings = await Transaction.findAll({
@@ -181,9 +164,8 @@ async function getAllStocks(userId, date, flag=0)
             having: sequelize.literal('SUM(share_quantity) > 0') // Exclude stocks where totalShares is 0
         });
 
-        //console.log(holdings);
-        //return holdings;
 
+        // Map through holdings and calculate their market value
         const results = await Promise.all(holdings.map(async (holding) => {
             const { stock_id, Stock } = holding;
             const { ticker, stock_name } = Stock;
@@ -191,14 +173,14 @@ async function getAllStocks(userId, date, flag=0)
 
             var currentPrice;
 
-            
+
             if (flag === 0) {
                 // Get the current price from Finnhub
                 currentPrice = await getCurrentStockPrice(ticker);
                 currentPrice = parseFloat(currentPrice).toFixed(2)
             }
-            else
-            {
+            else {
+                // Get historical price
                 currentPrice = parseFloat(getStockPriceData(ticker, interval = "1d", date, date)).toFixed(2);
             }
 
@@ -215,15 +197,15 @@ async function getAllStocks(userId, date, flag=0)
             };
         }));
 
-        //console.log(results)
         return results;
-    } 
+    }
     catch (error) {
         console.error('Error fetching all stocks:', error);
     }
 
 }
 
+// Function that obtain a set of timeframes
 async function getDates(timeframe) {
     const end = new Date().toISOString().split('T')[0];
     const startTemp = new Date();
@@ -246,6 +228,7 @@ async function getDates(timeframe) {
     return start;
 }
 
+// Function that calculates the historical wealth of a user over a given timeframe.
 async function calculateHistoricalWealth(userId, startDate, endDate) {
     try {
         // Fetch all relevant transactions for the user up to the end date
@@ -385,8 +368,8 @@ async function calculateHistoricalWealth(userId, startDate, endDate) {
     }
 }
 
-async function getStockPie(userID) 
-{
+// Function that gives out % each stock is worth vs total evaluation
+async function getStockPie(userID) {
     try {
         // Fetch sum of shares owned per stock up to the input date
         const holdings = await Transaction.findAll({
@@ -407,8 +390,6 @@ async function getStockPie(userID)
             group: ['stock_id'], // Group by stock_id
             having: sequelize.literal('SUM(share_quantity) > 0') // Exclude stocks where totalShares is 0
         });
-
-        //console.log(holdings);
 
         // Calculate the current valuation of each stock
         const stockValuations = await Promise.all(holdings.map(async (holding) => {
@@ -438,30 +419,30 @@ async function getStockPie(userID)
 
         console.log(topStocks);
 
-         // Calculate the percentage of total valuation for each of the top stocks
-         const stockNames = topStocks.map(stock => stock.stock_name);
-         const percentages = topStocks.map(stock => ((stock.marketValue / totalValuation) * 100).toFixed(2));
- 
-         // Calculate the percentage for the "Other" category if there are more than 4 stocks
-         if (stockValuations.length > 4) {
-             const otherValuation = stockValuations.slice(4).reduce((sum, stock) => sum + stock.marketValue, 0);
-             stockNames.push('Other');
-             percentages.push(((otherValuation / totalValuation) * 100).toFixed(2));
-         }
- 
-         return {
-             stockNames,
-             percentages,
-         };
-    } 
+        // Calculate the percentage of total valuation for each of the top stocks
+        const stockNames = topStocks.map(stock => stock.stock_name);
+        const percentages = topStocks.map(stock => ((stock.marketValue / totalValuation) * 100).toFixed(2));
+
+        // Calculate the percentage for the "Other" category if there are more than 4 stocks
+        if (stockValuations.length > 4) {
+            const otherValuation = stockValuations.slice(4).reduce((sum, stock) => sum + stock.marketValue, 0);
+            stockNames.push('Other');
+            percentages.push(((otherValuation / totalValuation) * 100).toFixed(2));
+        }
+
+        return {
+            stockNames,
+            percentages,
+        };
+    }
     catch (error) {
         console.error('Error fetching top stocks by valuation:', error);
         throw new Error('An error occurred while fetching the top stocks by valuation.');
     }
 }
 
-async function getSectorPie(userID) 
-{
+// Function that gives out % each sector is worth vs total evaluation
+async function getSectorPie(userID) {
     try {
         // Fetch the current stock holdings for the user, along with sector information
         const holdings = await Transaction.findAll({
@@ -535,13 +516,14 @@ async function getSectorPie(userID)
             sectorNames,
             percentages,
         };
-    } 
+    }
     catch (error) {
         console.error('Error fetching sector percentages by valuation:', error);
         throw new Error('An error occurred while fetching the sector percentages by valuation.');
     }
 }
 
+// Function that checks the user's balance
 async function getUserBalance(userId) {
     try {
 
@@ -564,6 +546,7 @@ async function getUserBalance(userId) {
     }
 }
 
+// Export the functions for use in other modules
 module.exports = {
     getTotalInvestment,
     getTotalValuation,
