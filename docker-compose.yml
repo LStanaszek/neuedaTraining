@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: c0nygre
+      MYSQL_DATABASE: Portfolio_Management
+      MYSQL_PASSWORD: c0nygre
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./Database/DB-MySQL.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+
+  backend:
+    build: ./src
+    container_name: node_backend
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: c0nygre
+      DB_NAME: Portfolio_Management
+      DB_DIALECT: mysql
+    ports:
+      - "8081:3000"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
