@@ -203,7 +203,7 @@ async function getShareAmount(userID, ticker)
         // If no transactions are found, netShares should be 0
         const netShares = result.get('netShares') || 0;
 
-        return {ticker : parseFloat(parseInt(netShares, 10)).toFixed(2)};
+        return {ticker : parseInt(netShares, 10)};
     }
     catch (error) {
         console.error('Error fetching stocks for passed ticker:', error);
