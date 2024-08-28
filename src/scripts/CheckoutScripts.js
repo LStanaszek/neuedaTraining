@@ -103,15 +103,15 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
 }
 
 //Asynchronous function to sell stocks
-async function sellStocks(stock_id, share_quantity, user_id) {
+async function sellStocks(ticker, share_quantity, user_id) {
 
     // Start a transaction
     const t = await sequelize.transaction();
 
     try {
         // Validate input data
-        if (!stock_id || share_quantity <= 0 || !user_id) {
-            throw new Error('All fields are required: stock_id, share_quantity <= 0, user_id');
+        if (!ticker || share_quantity <= 0 || !user_id) {
+            throw new Error('All fields are required: ticker, share_quantity <= 0, user_id');
         }
 
         // Find user
@@ -120,11 +120,13 @@ async function sellStocks(stock_id, share_quantity, user_id) {
             throw new Error('User not found');
         }
 
-        // Find stock
-        const stock = await Stock.findByPk(stock_id, { transaction: t });
+        // Find stock by ticker
+        const stock = await Stock.findOne({ where: { ticker }, transaction: t }); // Changed to find stock by ticker
         if (!stock) {
             throw new Error('Stock not found');
         }
+
+        const stock_id = stock.stock_id; // Use stock_id after finding stock by ticker
 
         // Calculate the total shares owned by the user
         const totalSharesOwned = await Transaction.sum('share_quantity', {
