@@ -16,6 +16,8 @@
             <h1 class="fw-bold">Dashboard</h1>
         </div>
 
+        <div id="addFundsContainer"></div>
+
         <!-- PERFORMANCE INDICATORS -->
         <div class="container mt-4">
             <div class="row g-4">
@@ -51,6 +53,7 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
         </div>
 
@@ -115,30 +118,118 @@
 
         <!-- INSERT NAV BAR -->
         <script>
-            fetch('./navBar.html')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('navbar').innerHTML = data;
-
-                    // HIGHLIGHT ACTIVE BUTTON
-                    let currentPath = window.location.pathname.split('/').pop();
-                    if (currentPath === '') {
-                        currentPath = 'index.html';
-                    }
-
-                    const navLinks = document.querySelectorAll('.nav-link');
-                    navLinks.forEach(link => {
-                        if (link.getAttribute('href') === currentPath) {
-                            link.classList.add('active');
-                            link.setAttribute('aria-current', 'page');
-                        } else {
-                            link.classList.remove('active');
-                            link.removeAttribute('aria-current');
+            document.addEventListener('DOMContentLoaded', function() {
+                // Fetch and insert the navbar
+                fetch('./navBar.html')
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('navbar').innerHTML = data;
+        
+                        // Highlight active button
+                        let currentPath = window.location.pathname.split('/').pop();
+                        if (currentPath === '') {
+                            currentPath = 'index.html';
                         }
+        
+                        const navLinks = document.querySelectorAll('.nav-link');
+                        navLinks.forEach(link => {
+                            if (link.getAttribute('href') === currentPath) {
+                                link.classList.add('active');
+                                link.setAttribute('aria-current', 'page');
+                            } else {
+                                link.classList.remove('active');
+                                link.removeAttribute('aria-current');
+                            }
+                        });
+        
+                        // Handle Add Funds button click
+                        const addFundsButton = document.querySelector('.addFundsButton');
+                        if (addFundsButton) {
+                            addFundsButton.addEventListener('click', function (e) {
+                                e.preventDefault();
+        
+                                fetch('addFunds.html')
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        document.getElementById('addFundsContainer').innerHTML = data;
+                                        const addFundsModal = new bootstrap.Modal(document.getElementById('addFundsModal'));
+                                        addFundsModal.show();
+                                        
+                                        // Set up form submission handling
+                                        setupAddFundsForm();
+                                    })
+                                    .catch(error => console.error('Error loading modal:', error));
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching navbar:', error));
+        
+                function setupAddFundsForm() {
+                    const addFundsForm = document.getElementById('addFundsForm');
+                    if (!addFundsForm) {
+                        console.error('Add Funds Form not found');
+                        return;
+                    }
+                
+                    addFundsForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                
+                        const fundsAmount = parseFloat(document.getElementById('fundsAmount').value); // Convert to float
+                        const cardNumber = document.getElementById('cardNumber').value;
+                        const expiryDate = document.getElementById('expiryDate').value;
+                        const cvv = document.getElementById('cvv').value;
+                
+                        console.log(typeof fundsAmount, cardNumber, expiryDate, cvv);
+                
+                        if (isNaN(fundsAmount) || cardNumber === '' || expiryDate === '' || cvv === '') {
+                            alert('Please fill out all fields correctly');
+                            return;
+                        }
+                
+                        fetch('./Dashboard/AddFunds', {
+                            method: 'PUT', 
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                user_id: 1,
+                                amount: fundsAmount // Pass as a number
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('freeCash').textContent = `$${data.user.balance.toLocaleString()}`;
+                            const addFundsModal = bootstrap.Modal.getInstance(document.getElementById('addFundsModal'));
+                            if (addFundsModal) {
+                                addFundsModal.hide();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred. Please try again.');
+                        });
                     });
-                });
+                
+                    // Add submit button functionality
+                    const addFundsConfirm = document.querySelector('.addFundsConfirm');
+                    if (addFundsConfirm) {
+                        addFundsConfirm.addEventListener('click', function (e) {
+                            addFundsForm.dispatchEvent(new Event('submit'));
+                        });
+                    }
+                }
+                    
+        
+                // Fetch and display the free cash balance
+                fetch('./Dashboard/Balance?userId=1')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('freeCash').textContent = `$${data.balance.toLocaleString()}`;
+                    })
+                    .catch(error => console.error('Error fetching balance data:', error));
+            });
         </script>
-
+        
 
         <!-- FETCH PERFORMANCE STATS -->
         <script>
