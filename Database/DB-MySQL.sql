@@ -139,7 +139,7 @@ VALUES
 (5, '2024-06-10', -90, 100.75, 1),
 
 (4, '2024-06-24', 70, 121.90, 1),
-(3, '2024-07-01', 105, 122.25, 1),
+(3, '2024-07-01', 155, 122.25, 1),
 (2, '2024-07-08', 60, 248.50, 1),
 
 -- Additional Sell Operation in July
@@ -152,7 +152,7 @@ VALUES
 (2, '2024-08-19', 65, 249.60, 1),
 
 -- 5 selling transactions spread over 4 weeks
-(1, '2024-08-30', -50, 152.30, 1),  -- Sell 50 AAPL shares, 225 remaining
+(1, '2024-08-30', -10, 152.30, 1),  -- Sell 50 AAPL shares, 225 remaining
 (2, '2024-09-05', -40, 247.00, 1),  -- Sell 40 MSFT shares, 20 remaining
 (4, '2024-09-12', -10, 123.00, 1),  -- Sell 30 JPM shares, 120 remaining
 (3, '2024-09-19', -60, 39.30, 1),   -- Sell 60 PFE shares, 220 remaining
@@ -171,3 +171,15 @@ VALUES
 -- DROP TABLE IF EXISTS Watchlist;
 -- DROP TABLE IF EXISTS Transactions;
 -- DROP TABLE IF EXISTS Stock;
+
+SELECT
+    s.stock_id,
+    s.stock_name,
+    s.ticker,
+    COALESCE(SUM(t.share_quantity), 0) AS net_shares_owned
+FROM
+    stocks s
+LEFT JOIN
+    transactions t ON s.stock_id = t.stock_id
+GROUP BY
+    s.stock_id;

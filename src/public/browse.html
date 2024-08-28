@@ -17,7 +17,7 @@
         }
 
         #suggestionsList .dropdown-item strong {
-            color: #007bff;
+            color: #33ff00;
         }
 
         #suggestionsList .dropdown-item span {
@@ -161,14 +161,16 @@ function populateStockListBackend(stockList, mainListId, additionalListId) {
         listItem.className = 'list-group-item';
 
         listItem.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span>${name} (${ticker})</span>
-                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                </div>
-            </div>
-        `;
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span>${name} (${ticker})</span>
+        </div>
+        <div>
+            <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+            <span class="badge ${growthClass} ms-2">${growthToday}</span>
+        </div>
+    </div>
+`;
 
         if (index < 3) {
             mainList.appendChild(listItem);
@@ -207,15 +209,17 @@ function populateStockListFallback(stockList, mainListId, additionalListId) {
         const listItem = document.createElement('li');
         listItem.className = 'list-group-item';
 
-        listItem.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span>${name} (${ticker})</span>
-                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                </div>
-            </div>
-        `;
+listItem.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span>${name} (${ticker})</span>
+        </div>
+        <div>
+            <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+            <span class="badge ${growthClass} ms-2">${growthToday}</span>
+        </div>
+    </div>
+`;
 
         if (index < 3) {
             mainList.appendChild(listItem);
@@ -309,19 +313,20 @@ async function fetchSearchSuggestions() {
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item';
 
-                    listItem.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span>${name} (${ticker})</span>
-                                <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                                <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                            </div>
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-primary me-2" type="button" onclick="showStockDetail('${ticker}')">View Detail</button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
-                            </div>
-                        </div>
-                    `;
+listItem.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span>${name} (${ticker})</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-sm btn-outline-primary me-2" type="button" onclick="showStockDetail('${ticker}')">View Detail</button>
+            <button class="btn btn-sm btn-outline-danger me-2" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
+            <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+            <span class="badge ${growthClass} ms-2">${growthToday}</span>
+        </div>
+    </div>
+`;
+
 
                     if (index < 3) {
                         watchlistItems.appendChild(listItem);
