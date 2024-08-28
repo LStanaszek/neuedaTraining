@@ -11,6 +11,7 @@ const {
     getTopGainers,
     getTopLosers 
 } = require('../scripts/BrowseScripts');
+const { getDates } = require('../scripts/DashboardScripts');
 
 const router = express.Router();
 
@@ -18,8 +19,13 @@ const router = express.Router();
 
 //GET historical data from external API given stock ticker and invertal of closing price for intervals 1m, 60m,.. 1mo
 router.get('/Historical', async (req, res) => {
-    //const { ticker } = req.params;
-    const { ticker, interval = '1d', start, end } = req.query;
+    // timeframe key=> 0:1W , 1:1mo 2:6mo, 3:1y, 
+    const { ticker, timeframe } = req.query;
+
+    const start = await getDates(timeframe);
+    const end = new Date().toISOString().split('T')[0];
+
+    const interval = '1d'
 
     try {
         const data = await getStockPriceData(ticker, interval, start, end);
