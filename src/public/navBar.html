@@ -11,13 +11,23 @@
                     <a class="nav-link active" aria-current="page" href="index.html">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="browse.html">Browse</a>
+                    <a class="nav-link" href="browse.html">Analysis</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="addFunds.html">Add Funds</a>
+                    <button class="nav-link btn addFundsButton">Add Funds</button>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn drawFundsButton">Withdraw</a>
                 </li>
               </ul>
-              <form class="d-flex position-relative" role="search" onsubmit="return false;">
+
+            <div class="card">
+                <div class="card-body text-center">
+                    <p class="card-text fs-6 fw-bold" id="freeCash">$0</p>
+                </div>
+            </div>
+
+              <form class="d-flex position-relative ms-3" role="search" onsubmit="return false;">
                 <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" id="searchBox" oninput="fetchSearchSuggestions()">
                 <button class="btn btn-outline-success" type="submit">Search</button>
                 <ul class="dropdown-menu position-absolute w-100" id="suggestionsList" style="display:none; z-index:1000;"></ul>
@@ -27,44 +37,4 @@
 </nav>
 
 
-<!-- <script>
-   async function fetchSearchSuggestions() {
-    const query = document.getElementById('searchBox').value;
-
-    if (query.length < 2) {
-        document.getElementById('suggestionsList').style.display = 'none';
-        return;
-    }
-
-    try {
-        const response = await fetch(`http://localhost:3000/SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-
-        const suggestions = data;
-        const suggestionsList = document.getElementById('suggestionsList');
-
-        suggestionsList.innerHTML = ''; // Clear previous suggestions
-
-        if (suggestions.length > 0) {
-            suggestions.forEach(suggestion => {
-                const li = document.createElement('li');
-                li.classList.add('dropdown-item');
-                li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name}`;
-                li.onclick = () => {
-                    document.getElementById('searchBox').value = suggestion.symbol;
-                    document.getElementById('suggestionsList').style.display = 'none';
-                };
-                suggestionsList.appendChild(li);
-            });
-            suggestionsList.style.display = 'block';
-        } else {
-            suggestionsList.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Error fetching search suggestions:', error);
-        document.getElementById('suggestionsList').style.display = 'none';
-    }
-}
-
-    </script> -->
     

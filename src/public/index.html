@@ -17,6 +17,7 @@
         </div>
 
         <div id="addFundsContainer"></div>
+        <div id="drawFundsContainer"></div>
 
         <!-- PERFORMANCE INDICATORS -->
         <div class="container mt-4">
@@ -119,7 +120,6 @@
         <!-- INSERT NAV BAR -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Fetch and insert the navbar
                 fetch('./navBar.html')
                     .then(response => response.text())
                     .then(data => {
@@ -156,7 +156,27 @@
                                         addFundsModal.show();
                                         
                                         // Set up form submission handling
-                                        setupAddFundsForm();
+                                        setupFundsForm("Add");
+                                    })
+                                    .catch(error => console.error('Error loading modal:', error));
+                            });
+                        }
+
+                        // Handle Withdraw Funds button click
+                        const drawFundsButton = document.querySelector('.drawFundsButton');
+                        if (drawFundsButton) {
+                            drawFundsButton.addEventListener('click', function (e) {
+                                e.preventDefault();
+        
+                                fetch('drawFunds.html')
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        document.getElementById('drawFundsContainer').innerHTML = data;
+                                        const drawFundsModal = new bootstrap.Modal(document.getElementById('drawFundsModal'));
+                                        drawFundsModal.show();
+                                        
+                                        // Set up form submission handling
+                                        setupFundsForm("Withdraw", "fundsDrawAmount", "cardDrawNumber", "expiryDrawDate", "drawcvv");
                                     })
                                     .catch(error => console.error('Error loading modal:', error));
                             });
@@ -164,60 +184,81 @@
                     })
                     .catch(error => console.error('Error fetching navbar:', error));
         
-                function setupAddFundsForm() {
-                    const addFundsForm = document.getElementById('addFundsForm');
-                    if (!addFundsForm) {
-                        console.error('Add Funds Form not found');
-                        return;
-                    }
-                
-                    addFundsForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-                
-                        const fundsAmount = parseFloat(document.getElementById('fundsAmount').value); // Convert to float
-                        const cardNumber = document.getElementById('cardNumber').value;
-                        const expiryDate = document.getElementById('expiryDate').value;
-                        const cvv = document.getElementById('cvv').value;
-                
-                        console.log(typeof fundsAmount, cardNumber, expiryDate, cvv);
-                
-                        if (isNaN(fundsAmount) || cardNumber === '' || expiryDate === '' || cvv === '') {
-                            alert('Please fill out all fields correctly');
+
+                    function setupFundsForm(choice, amount = "fundsAmount", inputCardNumber = "cardNumber", inputExpiryDate = "expiryDate", inputCvv = "cvv") {
+                        let formId, apiEndpoint, modalId, submitButtonSelector;
+
+                        if (choice === "Add") {
+                            formId = "addFundsForm";
+                            apiEndpoint = "./Dashboard/AddFunds";
+                            modalId = "addFundsModal";
+                            submitButtonSelector = ".addFundsConfirm";
+                        } else if (choice === "Withdraw") {
+                            formId = "drawFundsForm";
+                            apiEndpoint = "./Dashboard/WithdrawFunds";
+                            modalId = "drawFundsModal";
+                            submitButtonSelector = ".drawFundsConfirm";
+                        }
+
+                        // Get the form element and replace it with a clone to remove old event listeners
+                        const fundsForm = document.getElementById(formId);
+                        if (!fundsForm) {
+                            console.error(`${choice} Funds Form not found`);
                             return;
                         }
-                
-                        fetch('./Dashboard/AddFunds', {
-                            method: 'PUT', 
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                user_id: 1,
-                                amount: fundsAmount // Pass as a number
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            document.getElementById('freeCash').textContent = `$${data.user.balance.toLocaleString()}`;
-                            const addFundsModal = bootstrap.Modal.getInstance(document.getElementById('addFundsModal'));
-                            if (addFundsModal) {
-                                addFundsModal.hide();
+
+                        const clonedFundsForm = fundsForm.cloneNode(true); // Clone the form to reset listeners
+                        fundsForm.replaceWith(clonedFundsForm); // Replace the old form with the new cloned form
+
+                        // Add a new event listener to the cloned form
+                        clonedFundsForm.addEventListener('submit', function (e) {
+                            e.preventDefault();
+
+                            const fundsAmount = parseFloat(document.getElementById(amount).value); // Convert to float
+                            const cardNumber = document.getElementById(inputCardNumber).value;
+                            const expiryDate = document.getElementById(inputExpiryDate).value;
+                            const cvv = document.getElementById(inputCvv).value;
+
+                            if (isNaN(fundsAmount) || cardNumber === '' || expiryDate === '' || cvv === '') {
+                                alert('Please fill out all fields correctly');
+                                return;
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred. Please try again.');
+
+
+                            fetch(apiEndpoint, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    user_id: 1,
+                                    amount: fundsAmount // Pass as a number
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const roundedBalance = parseFloat(data.user.balance).toFixed(2);
+                                document.getElementById('freeCash').textContent = `$${parseFloat(roundedBalance).toLocaleString()}`;
+                                const fundsModal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                                if (fundsModal) {
+                                    fundsModal.hide();
+                                }
+                            })
+                            .catch(error => {
+                                alert('Insufficient funds');
+                            });
                         });
-                    });
-                
-                    // Add submit button functionality
-                    const addFundsConfirm = document.querySelector('.addFundsConfirm');
-                    if (addFundsConfirm) {
-                        addFundsConfirm.addEventListener('click', function (e) {
-                            addFundsForm.dispatchEvent(new Event('submit'));
-                        });
+
+                        // Add submit button functionality
+                        const fundsConfirmButton = document.querySelector(submitButtonSelector);
+                        if (fundsConfirmButton) {
+                            fundsConfirmButton.addEventListener('click', function () {
+                                clonedFundsForm.dispatchEvent(new Event('submit')); // Trigger the form submission programmatically
+                            });
+                        }
                     }
-                }
+
+                    
                     
         
                 // Fetch and display the free cash balance
