@@ -359,75 +359,63 @@
         </script>
         
 
-        <!-- STOCK PIE CHARTS -->
+        <!-- STOCK AND SECTORS PIE CHARTS -->
 
         <script>
-            const stockPieData = {
-                labels: ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'Other'],
-                datasets: [{
-                    data: [30, 25, 20, 15, 10]
-                }]
-            };
-        
-            const stockPieCtx = document.getElementById('stockPieChart').getContext('2d');
-            const stockPieChart = new Chart(stockPieCtx, {
-                type: 'doughnut',
-                data: stockPieData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Your Top Stocks',
-                            font: {
-                                size: 15
+            function createPieChart(ctx, data, title, option) {
+                let pieLabels;
+                if (option === 'stock'){
+                    pieLabels = data.stockNames;
+                }
+                else{
+                    pieLabels = data.sectorNames;
+                }
+                pieData = {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: data.percentages
+                    }]
+                };
+                const pieChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: pieData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: title,
+                                font: {
+                                    size: 15
+                                }
+                            },
+                            legend: {
+                                display: true,
+                                position: 'bottom'
                             }
-                        },
-                        legend: {
-                            display: true,
-                            position: 'bottom'
                         }
                     }
-                }
-            });
-        </script>
-        
-        <!-- SECTOR PIE CHART -->
-        <script>
-            const sectorData = {
-                labels: ['Technology', 'Healthcare', 'Finance', 'Energy', 'Other'],
-                datasets: [{
-                    data: [40, 30, 15, 10, 5]
-                }]
+                });
             };
-        
-            const sectorPieCtx = document.getElementById('sectorPieChart').getContext('2d');
-            const sectorPieChart = new Chart(sectorPieCtx, {
-                type: 'doughnut',
-                data: sectorData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Your Portfolio Sectors',
-                            font: {
-                                size: 15
-                            }
-                        },
-                        legend: {
-                            display: true,
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+
+            fetch('./Dashboard/StockPie?userId=1')
+                .then(response => response.json())
+                .then(data => {
+                    const stockPieCtx = document.getElementById('stockPieChart').getContext('2d');
+                    createPieChart(stockPieCtx, data, 'Your Portfolio Stocks', "stock");
+                })
+                .catch(error => console.error('Error fetching stock pie chart data:', error));
+
+            fetch('./Dashboard/SectorPie?userId=1')
+                .then(response => response.json())
+                .then(data => {
+                    const sectorPieCtx = document.getElementById('sectorPieChart').getContext('2d');
+                    createPieChart(sectorPieCtx, data, 'Your Portfolio Sectors', "sector");
+                })
+                .catch(error => console.error('Error fetching sector pie chart data:', error));
+
         </script>
-        
-        
-        
         
 
 
