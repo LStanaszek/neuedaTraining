@@ -39,11 +39,19 @@ router.get('/api/autocomplete', async (req, res) => {
     // Use yahoo-finance2's search method to find relevant stock symbols
     const result = await yahooFinance.search(query);
 
-    // Extract relevant information from the result
-    const suggestions = result.quotes.map(item => ({
-      symbol: item.symbol,
-      name: item.shortname || item.longname || item.name, // Fallback to available name fields
-    }));
+    // Check if the result is properly defined and contains quotes
+    if (!result || !result.quotes) {
+      console.error('No results or quotes found for the search query:', query);
+      return res.status(404).json({ error: 'No results found' });
+    }
+
+    // Filter out companies with a ticker size above 5 characters and map to desired format
+    const suggestions = result.quotes
+      .filter(item => item.symbol && item.symbol.length <= 5) // Check for symbol existence and length
+      .map(item => ({
+        symbol: item.symbol,
+        name: item.shortname || item.longname || item.name, // Fallback to available name fields
+      }));
 
     // Send the autocomplete suggestions as a JSON response
     res.json(suggestions);
