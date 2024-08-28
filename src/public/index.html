@@ -298,18 +298,17 @@
         <!-- OWNED STOCKS LIST -->
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-
                 const maxVisibleStocks = 3;
                 const stockTableBody = document.getElementById("stockTable");
                 const viewAllBtn = document.getElementById("viewAllStock");
                 let showingAll = false;
-        
-                const userId = "1"; 
-        
+                let stocksData = []; // Variable to hold the fetched stock data
+                const userId = "1";
+            
                 function renderTable(stocks, showAll = false) {
                     stockTableBody.innerHTML = "";
                     const stocksToShow = showAll ? stocks.length : Math.min(stocks.length, maxVisibleStocks);
-        
+            
                     if (stocks.length === 0) {
                         const row = `
                             <tr>
@@ -320,7 +319,7 @@
                         viewAllBtn.style.display = 'none';
                         return;
                     }
-        
+            
                     for (let i = 0; i < stocksToShow; i++) {
                         const stock = stocks[i];
                         const row = `
@@ -335,28 +334,30 @@
                         `;
                         stockTableBody.insertAdjacentHTML('beforeend', row);
                     }
-        
+            
                     viewAllBtn.textContent = showAll ? "View Less" : "View All";
                     viewAllBtn.style.display = stocks.length <= maxVisibleStocks ? 'none' : 'block';
                 }
-        
+            
                 fetch(`./Dashboard/GetAll?userId=${userId}`)
                     .then(response => {
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         return response.json();
                     })
                     .then(data => {
-                        renderTable(data.stocks);
+                        stocksData = data.stocks; // Store the fetched data
+                        renderTable(stocksData);  // Render table with the initial data
                     })
                     .catch(error => console.error('Error fetching performance data:', error));
-        
+            
                 viewAllBtn.addEventListener("click", function (e) {
                     e.preventDefault();
                     showingAll = !showingAll;
-                    renderTable(data.stocks, showingAll);
+                    renderTable(stocksData, showingAll); // Use the stored stocksData instead of "data"
                 });
             });
         </script>
+            
         
 
         <!-- STOCK AND SECTORS PIE CHARTS -->
