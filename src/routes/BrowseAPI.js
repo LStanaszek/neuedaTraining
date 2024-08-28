@@ -9,7 +9,8 @@ const {
     deleteStockFromWatchlist, 
     addStockToWatchlist,
     getTopGainers,
-    getTopLosers 
+    getTopLosers,
+    getStockDatesPrices 
 } = require('../scripts/BrowseScripts');
 const { getDates } = require('../scripts/DashboardScripts');
 
@@ -29,6 +30,24 @@ router.get('/Historical', async (req, res) => {
 
     try {
         const data = await getStockPriceData(ticker, interval, start, end);
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'BrowseAPI: An error occurred while fetching data.' });
+    }
+});
+
+router.get('/HistoricalDatesPrices', async (req, res) => {
+    // timeframe key=> 0:1W , 1:1mo 2:6mo, 3:1y, 
+    const { ticker, timeframe } = req.query;
+
+    const start = await getDates(timeframe);
+    const end = new Date().toISOString().split('T')[0];
+
+    const interval = '1d'
+
+    try {
+        const data = await getStockDatesPrices(ticker, interval, start, end);
         res.json(data);
     } catch (error) {
         console.error('Error fetching data:', error);
