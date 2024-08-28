@@ -1,9 +1,9 @@
 FROM node:18
 
-WORKDIR /home/student/neuedaTraining
+WORKDIR /home/student/neuedaTraining/src
 
 
-COPY package*.json ./neuedaTraining/
+COPY package*.json ./neuedaTraining/src
 
 RUN npm install 
 
