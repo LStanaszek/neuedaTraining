@@ -1,4 +1,3 @@
-<!--/src/public/browse.html file-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,14 +98,14 @@ function fetchAndDisplayTopGainers() {
         .then(data => {
             console.log(data);
             if (Array.isArray(data) && data.length === 0) {
-                populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+                populateStockList(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
             } else {
-                populateStockListBackend(data || fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+                populateStockList(data || fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
             }
         })
         .catch(error => {
             console.error('Error fetching top gainers:', error);
-            populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+            populateStockList(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
         });
 }
 
@@ -117,66 +116,19 @@ function fetchAndDisplayTopLosers() {
         .then(data => {
             console.log(data);
             if (Array.isArray(data) && data.length === 0) {
-                populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+                populateStockList(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
             } else {
-                populateStockListBackend(data || fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+                populateStockList(data || fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
             }
         })
         .catch(error => {
             console.error('Error fetching top losers:', error);
-            populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+            populateStockList(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
         });
 }
 
         // Function to populate stock lists with styling based on growth
-        function populateStockListBackend(stockList, mainListId, additionalListId) {
-    const mainList = document.getElementById(mainListId);
-    const additionalList = document.getElementById(additionalListId);
-
-    stockList.forEach((item, index) => {
-        let name = item.name || "Unknown";
-        const ticker = item.ticker || "Unknown Ticker";
-        const currentPrice = item.price !== undefined ? `$${item.price}` : "N/A";
-        
-        // Format the growth percentage to two decimal places
-        const growthToday = item.change_percentage !== undefined ? `${parseFloat(item.change_percentage).toFixed(2)}%` : "N/A";
-
-        // If the name is "Unknown Stock", use the ticker instead and capitalize it
-        if (name === "Unknown Stock") {
-            name = ticker.charAt(0).toUpperCase() + ticker.slice(1).toLowerCase();
-        }
-
-        // Determine class for growth
-        const growthValue = parseFloat(item.change_amount) || 0;
-        let growthClass = '';
-        if (growthValue > 0) {
-            growthClass = 'badge-growth-positive'; // Green background for positive growth
-        } else if (growthValue < 0) {
-            growthClass = 'badge-growth-negative'; // Red background for negative growth
-        }
-
-        const listItem = document.createElement('li');
-        listItem.className = 'list-group-item';
-
-        listItem.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span>${name} (${ticker})</span>
-                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                </div>
-            </div>
-        `;
-
-        if (index < 3) {
-            mainList.appendChild(listItem);
-        } else {
-            additionalList.appendChild(listItem);
-        }
-    });
-}
-
-function populateStockListFallback(stockList, mainListId, additionalListId) {
+        function populateStockList(stockList, mainListId, additionalListId) {
     const mainList = document.getElementById(mainListId);
     const additionalList = document.getElementById(additionalListId);
 
@@ -184,9 +136,7 @@ function populateStockListFallback(stockList, mainListId, additionalListId) {
         let name = item.name || "Unknown";
         const ticker = item.ticker || "Unknown Ticker";
         const currentPrice = item.current_price !== undefined ? `$${item.current_price}` : "N/A";
-        
-        // Format the growth percentage to two decimal places
-        const growthToday = item.growth_today !== undefined ? `${parseFloat(item.growth_today).toFixed(2)}` : "N/A";
+        const growthToday = item.growth_today !== undefined ? `${item.growth_today}` : "N/A";
 
         // If the name is "Unknown Stock", use the ticker instead and capitalize it
         if (name === "Unknown Stock") {
@@ -225,56 +175,43 @@ function populateStockListFallback(stockList, mainListId, additionalListId) {
 
 
 
-
-async function fetchSearchSuggestions() {
-    const query = document.getElementById('searchBox').value;
-
-    if (query.length < 2) {
-        document.getElementById('suggestionsList').style.display = 'none';
-        return;
-    }
-
-    try {
-        const response = await fetch(`http://localhost:3000/SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-
-        const suggestions = data;
-        const suggestionsList = document.getElementById('suggestionsList');
-
-        suggestionsList.innerHTML = ''; // Clear previous suggestions
-
-        if (suggestions.length > 0) {
-            // Filter out suggestions with undefined or invalid symbols and names
-            const validSuggestions = suggestions.filter(suggestion => 
-                suggestion.symbol && suggestion.symbol.trim() !== '' &&
-                suggestion.name && suggestion.name.trim() !== ''
-            );
-
-            if (validSuggestions.length > 0) {
-                validSuggestions.forEach(suggestion => {
-                    const li = document.createElement('li');
-                    li.classList.add('dropdown-item');
-                    li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name}`;
-                    li.onclick = () => {
-                        document.getElementById('searchBox').value = suggestion.symbol;
-                        document.getElementById('suggestionsList').style.display = 'none';
-                    };
-                    suggestionsList.appendChild(li);
-                });
-                suggestionsList.style.display = 'block';
-            } else {
-                suggestionsList.style.display = 'none';
+        async function fetchSearchSuggestions() {
+                const query = document.getElementById('searchBox').value;
+            
+                if (query.length < 2) {
+                    document.getElementById('suggestionsList').style.display = 'none';
+                    return;
+                }
+            
+                try {
+                    const response = await fetch(`http://localhost:3000/SearchSuggestion/SymbolSearch?ticker=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+            
+                    const suggestions = data.SymbolSearch;
+                    const suggestionsList = document.getElementById('suggestionsList');
+            
+                    suggestionsList.innerHTML = ''; // Clear previous suggestions
+            
+                    if (suggestions.length > 0) {
+                        suggestions.forEach(suggestion => {
+                            const li = document.createElement('li');
+                            li.classList.add('dropdown-item');
+                            li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name} (${suggestion.region})`;
+                            li.onclick = () => {
+                                document.getElementById('searchBox').value = suggestion.symbol;
+                                document.getElementById('suggestionsList').style.display = 'none';
+                            };
+                            suggestionsList.appendChild(li);
+                        });
+                        suggestionsList.style.display = 'block';
+                    } else {
+                        suggestionsList.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching search suggestions:', error);
+                    document.getElementById('suggestionsList').style.display = 'none';
+                }
             }
-        } else {
-            suggestionsList.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Error fetching search suggestions:', error);
-        document.getElementById('suggestionsList').style.display = 'none';
-    }
-}
-
-
 
          // Function to fetch and display the watchlist
          async function fetchWatchlist() {
@@ -283,6 +220,8 @@ async function fetchSearchSuggestions() {
                 const data = await response.json();
                 const watchlistItems = document.getElementById('watchlistItems');
                 const additionalWatchlistItems = document.getElementById('additionalWatchlistItems');
+
+            
 
                 data.forEach((item, index) => {
                     const name = item.name || "Unknown";
@@ -328,44 +267,194 @@ async function fetchSearchSuggestions() {
         }
 
         // Function to show stock details in the modal
-        async function showStockDetail(ticker) {
-            const modalDetailContent = document.getElementById('modalDetailContent');
-            const modalTitle = document.getElementById('stockDetailModalLabel');
+// Function to show stock details in the modal
+// Function to show stock details in the modal
+async function showStockDetail(ticker) {
+    const modalDetailContent = document.getElementById('modalDetailContent');
+    const modalTitle = document.getElementById('stockDetailModalLabel');
 
-            try {
-                const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
-                if (!profileResponse.ok) {
-                    throw new Error(`Failed to fetch company profile for ${ticker}`);
-                }
-                const profileData = await profileResponse.json();
-                const profile = profileData.CompanyInfo;
-
-                const watchlistResponse = await fetch('http://localhost:3000/Browse/watchlist');
-                const watchlistData = await watchlistResponse.json();
-                const stockData = watchlistData.find(stock => stock.ticker === ticker);
-
-                modalTitle.innerHTML = `
-                    <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
-                    ${profile.name}(${profile.ticker})
-                `;
-
-
-                modalDetailContent.innerHTML = `
-                    <p><strong>Current Price:</strong> $${stockData.current_price}</p>
-                    <p><strong>Growth Today:</strong> ${stockData.growth_today}%</p>
-                    <hr>
-                    <p><strong>Country:</strong> ${profile.country}</p>
-                    <p><strong>Exchange:</strong> ${profile.exchange}</p>
-                    <p><strong>Phone:</strong> ${profile.phone}</p>
-                    <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
-                `;
-
-                const stockDetailModal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
-                stockDetailModal.show();
-            } catch (error) {
-                modalDetailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
-            }
+    try {
+        // Fetch company profile
+        const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+        if (!profileResponse.ok) {
+            throw new Error(`Failed to fetch company profile for ${ticker}`);
         }
+        const profileData = await profileResponse.json();
+        const profile = profileData.CompanyInfo;
+
+        // Fetch watchlist data
+        const watchlistResponse = await fetch('http://localhost:3000/Browse/watchlist');
+        const watchlistData = await watchlistResponse.json();
+        const stockData = watchlistData.find(stock => stock.ticker === ticker);
+
+        // Fetch user balance
+        const balanceResponse = await fetch('http://localhost:3000/Dashboard/Balance?userId=1');
+        const balanceData = await balanceResponse.json();
+
+        // Fetch user's current share amount
+        const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
+        const shareAmountData = await shareAmountResponse.json();
+
+        // Update modal title with company logo, name, ticker, and Buy/Sell buttons
+        modalTitle.innerHTML = `
+            <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
+            ${profile.name} (${profile.ticker})
+            <div class="ms-auto">
+                <button class="btn btn-success btn-sm me-2" id="buyButton">Buy</button>
+                <button class="btn btn-danger btn-sm" id="sellButton">Sell</button>
+            </div>
+        `;
+
+        // Update modal content with current price, growth, balance, and shares owned
+        modalDetailContent.innerHTML = `
+            <p><strong>Current Price:</strong> $${stockData.current_price}</p>
+            <p><strong>Growth Today:</strong> ${stockData.growth_today}%</p>
+            <hr>
+            <p><strong>Your Balance:</strong> $${balanceData.balance}</p>
+            <p><strong>Your Shares:</strong> ${shareAmountData.ticker} shares</p>
+            <p><strong>Country:</strong> ${profile.country}</p>
+            <p><strong>Exchange:</strong> ${profile.exchange}</p>
+            <p><strong>Phone:</strong> ${profile.phone}</p>
+            <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
+        `;
+
+        // Show the modal
+        const stockDetailModal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
+        stockDetailModal.show();
+
+        // Remove previous event listeners before adding new ones
+        document.getElementById('buyButton').replaceWith(document.getElementById('buyButton').cloneNode(true));
+        document.getElementById('sellButton').replaceWith(document.getElementById('sellButton').cloneNode(true));
+
+
+        // Add event listeners for Buy and Sell buttons
+        document.getElementById('buyButton').addEventListener('click', function() {
+            showBuyModal(profile, stockData, balanceData.balance);
+        });
+
+        document.getElementById('sellButton').addEventListener('click', function() {
+            showSellModal(profile, stockData, shareAmountData.ticker);
+        });
+
+    } catch (error) {
+        modalDetailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
+    }
+}
+
+
+// Show Buy Modal
+function showBuyModal(profile, stockData, userBalance) {
+    const buyStockModal = new bootstrap.Modal(document.getElementById('buyStockModal'));
+
+    // Populate the Buy modal with company details
+    document.getElementById('buyCompanyName').textContent = profile.name;
+    document.getElementById('buyTicker').textContent = profile.ticker;
+    document.getElementById('buyPrice').textContent = stockData.current_price;
+    document.getElementById('userBalance').textContent = userBalance;
+
+     // Remove previous event listener before adding a new one
+     document.getElementById('confirmBuyButton').replaceWith(document.getElementById('confirmBuyButton').cloneNode(true));
+
+    document.getElementById('confirmBuyButton').addEventListener('click', async function() {
+        const shareQuantity = parseInt(document.getElementById('buyQuantity').value, 10);
+        if (isNaN(shareQuantity) || shareQuantity <= 0) {
+            alert('Please enter a valid number of shares.');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/Checkout/BuyStocks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ticker: profile.ticker,
+                    share_quantity: shareQuantity,
+                    user_id: 1, // Default user ID
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to purchase stocks.');
+            }
+
+            const data = await response.json();
+            alert(data.message);
+            buyStockModal.hide();
+        } catch (error) {
+            alert('Error purchasing stocks: ' + error.message);
+        }
+    });
+
+    buyStockModal.show();
+}
+
+// Show Sell Modal
+function showSellModal(profile, stockData, userShares) {
+    const sellStockModal = new bootstrap.Modal(document.getElementById('sellStockModal'));
+
+    // Populate the Sell modal with company details
+    document.getElementById('sellCompanyName').textContent = profile.name;
+    document.getElementById('sellTicker').textContent = profile.ticker;
+    document.getElementById('sellPrice').textContent = stockData.current_price;
+    document.getElementById('userShares').textContent = userShares;
+
+    document.getElementById('confirmSellButton').addEventListener('click', async function() {
+        const shareQuantity = parseInt(document.getElementById('sellQuantity').value, 10);
+        if (isNaN(shareQuantity) || shareQuantity <= 0) {
+            alert('Please enter a valid number of shares.');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/Checkout/SellStocks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ticker: profile.ticker,
+                    share_quantity: shareQuantity,
+                    user_id: 1, // Default user ID
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to sell stocks.');
+            }
+
+            const data = await response.json();
+            alert(data.message);
+            sellStockModal.hide();
+        } catch (error) {
+            alert('Error selling stocks: ' + error.message);
+        }
+    });
+
+    sellStockModal.show();
+}
+
+
+        
+        
+        
+        
+        //show stock detail from search
+        function showStockDetailFromSearch() {
+    const ticker = document.getElementById('searchBox').value.trim();
+    
+    if (ticker) {
+        showStockDetail(ticker);
+    } else {
+        console.error('Search box is empty');
+    }
+    return false; // Prevent form submission
+}
+
+
+
+
 
         // Function to remove a stock from the watchlist
         async function removeFromWatchlist(watchID, buttonElement) {
@@ -390,6 +479,7 @@ async function fetchSearchSuggestions() {
         fetchAndDisplayTopLosers();
         fetchWatchlist();
         fetchSearchSuggestions();
+        showStockDetailFromSearch()
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
@@ -416,6 +506,55 @@ async function fetchSearchSuggestions() {
             </div>
         </div>
     </div>
+
+
+<!-- Buy Stock Modal -->
+<div class="modal fade" id="buyStockModal" tabindex="-1" aria-labelledby="buyStockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="buyStockModalLabel">Buy Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Company:</strong> <span id="buyCompanyName"></span></p>
+                <p><strong>Ticker:</strong> <span id="buyTicker"></span></p>
+                <p><strong>Current Price:</strong> $<span id="buyPrice"></span></p>
+                <p><strong>Your Balance:</strong> $<span id="userBalance"></span></p>
+                <div class="mb-3">
+                    <label for="buyQuantity" class="form-label">Number of Shares</label>
+                    <input type="number" class="form-control" id="buyQuantity" min="1" placeholder="Enter number of shares">
+                </div>
+                <button type="button" class="btn btn-primary" id="confirmBuyButton">Confirm Buy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sell Stock Modal -->
+<div class="modal fade" id="sellStockModal" tabindex="-1" aria-labelledby="sellStockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sellStockModalLabel">Sell Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Company:</strong> <span id="sellCompanyName"></span></p>
+                <p><strong>Ticker:</strong> <span id="sellTicker"></span></p>
+                <p><strong>Current Price:</strong> $<span id="sellPrice"></span></p>
+                <p><strong>Your Shares:</strong> <span id="userShares"></span> shares</p>
+                <div class="mb-3">
+                    <label for="sellQuantity" class="form-label">Number of Shares</label>
+                    <input type="number" class="form-control" id="sellQuantity" min="1" placeholder="Enter number of shares">
+                </div>
+                <button type="button" class="btn btn-primary" id="confirmSellButton">Confirm Sell</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
     <!-- Top Gainers and Losers Section -->
     <div class="container mt-4 d-flex justify-content-center">
