@@ -99,14 +99,14 @@ function fetchAndDisplayTopGainers() {
         .then(data => {
             console.log(data);
             if (Array.isArray(data) && data.length === 0) {
-                populateStockList(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+                populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
             } else {
-                populateStockList(data || fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+                populateStockListBackend(data || fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
             }
         })
         .catch(error => {
             console.error('Error fetching top gainers:', error);
-            populateStockList(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
+            populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
         });
 }
 
@@ -117,19 +117,66 @@ function fetchAndDisplayTopLosers() {
         .then(data => {
             console.log(data);
             if (Array.isArray(data) && data.length === 0) {
-                populateStockList(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+                populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
             } else {
-                populateStockList(data || fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+                populateStockListBackend(data || fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
             }
         })
         .catch(error => {
             console.error('Error fetching top losers:', error);
-            populateStockList(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
+            populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
         });
 }
 
         // Function to populate stock lists with styling based on growth
-        function populateStockList(stockList, mainListId, additionalListId) {
+        function populateStockListBackend(stockList, mainListId, additionalListId) {
+    const mainList = document.getElementById(mainListId);
+    const additionalList = document.getElementById(additionalListId);
+
+    stockList.forEach((item, index) => {
+        let name = item.name || "Unknown";
+        const ticker = item.ticker || "Unknown Ticker";
+        const currentPrice = item.price !== undefined ? `$${item.price}` : "N/A";
+        
+        // Format the growth percentage to two decimal places
+        const growthToday = item.change_percentage !== undefined ? `${parseFloat(item.change_percentage).toFixed(2)}%` : "N/A";
+
+        // If the name is "Unknown Stock", use the ticker instead and capitalize it
+        if (name === "Unknown Stock") {
+            name = ticker.charAt(0).toUpperCase() + ticker.slice(1).toLowerCase();
+        }
+
+        // Determine class for growth
+        const growthValue = parseFloat(item.change_amount) || 0;
+        let growthClass = '';
+        if (growthValue > 0) {
+            growthClass = 'badge-growth-positive'; // Green background for positive growth
+        } else if (growthValue < 0) {
+            growthClass = 'badge-growth-negative'; // Red background for negative growth
+        }
+
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item';
+
+        listItem.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span>${name} (${ticker})</span>
+                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
+                </div>
+            </div>
+        `;
+
+        if (index < 3) {
+            mainList.appendChild(listItem);
+        } else {
+            additionalList.appendChild(listItem);
+        }
+    });
+}
+
+function populateStockListFallback(stockList, mainListId, additionalListId) {
     const mainList = document.getElementById(mainListId);
     const additionalList = document.getElementById(additionalListId);
 
@@ -137,7 +184,9 @@ function fetchAndDisplayTopLosers() {
         let name = item.name || "Unknown";
         const ticker = item.ticker || "Unknown Ticker";
         const currentPrice = item.current_price !== undefined ? `$${item.current_price}` : "N/A";
-        const growthToday = item.growth_today !== undefined ? `${item.growth_today}` : "N/A";
+        
+        // Format the growth percentage to two decimal places
+        const growthToday = item.growth_today !== undefined ? `${parseFloat(item.growth_today).toFixed(2)}` : "N/A";
 
         // If the name is "Unknown Stock", use the ticker instead and capitalize it
         if (name === "Unknown Stock") {
@@ -195,17 +244,27 @@ async function fetchSearchSuggestions() {
         suggestionsList.innerHTML = ''; // Clear previous suggestions
 
         if (suggestions.length > 0) {
-            suggestions.forEach(suggestion => {
-                const li = document.createElement('li');
-                li.classList.add('dropdown-item');
-                li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name}`;
-                li.onclick = () => {
-                    document.getElementById('searchBox').value = suggestion.symbol;
-                    document.getElementById('suggestionsList').style.display = 'none';
-                };
-                suggestionsList.appendChild(li);
-            });
-            suggestionsList.style.display = 'block';
+            // Filter out suggestions with undefined or invalid symbols and names
+            const validSuggestions = suggestions.filter(suggestion => 
+                suggestion.symbol && suggestion.symbol.trim() !== '' &&
+                suggestion.name && suggestion.name.trim() !== ''
+            );
+
+            if (validSuggestions.length > 0) {
+                validSuggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.classList.add('dropdown-item');
+                    li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name}`;
+                    li.onclick = () => {
+                        document.getElementById('searchBox').value = suggestion.symbol;
+                        document.getElementById('suggestionsList').style.display = 'none';
+                    };
+                    suggestionsList.appendChild(li);
+                });
+                suggestionsList.style.display = 'block';
+            } else {
+                suggestionsList.style.display = 'none';
+            }
         } else {
             suggestionsList.style.display = 'none';
         }
@@ -214,6 +273,7 @@ async function fetchSearchSuggestions() {
         document.getElementById('suggestionsList').style.display = 'none';
     }
 }
+
 
 
          // Function to fetch and display the watchlist
