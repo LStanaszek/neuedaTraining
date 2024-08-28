@@ -85,7 +85,7 @@ async function getTotalValuation() {
 
 async function AddFundsUser(userId, amount) {
     // Validate input
-    if (!userId || typeof amount !== 'number') {
+    if (!userId || typeof amount !== 'number' || amount <= 0) {
       throw new Error('Invalid input');
     }
   
