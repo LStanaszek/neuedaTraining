@@ -19,8 +19,7 @@ const router = express.Router();
 
 //GET historical data from external API given stock ticker and invertal of closing price for intervals 1m, 60m,.. 1mo
 router.get('/Historical', async (req, res) => {
-    //const { ticker } = req.params;
-    // 0:1W , 1:1mo 2:6mo, 3:1y, 
+    // timeframe key=> 0:1W , 1:1mo 2:6mo, 3:1y, 
     const { ticker, timeframe } = req.query;
 
     const start = await getDates(timeframe);
