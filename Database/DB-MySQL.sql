@@ -137,7 +137,6 @@ VALUES
 (1, '2024-05-27', -80, 150.30, 1),
 (2, '2024-06-03', -85, 249.50, 1),
 (5, '2024-06-10', -90, 100.75, 1),
-(6, '2024-06-17', -95, 143.95, 1),  -- End of the downward slope
 
 (4, '2024-06-24', 70, 121.90, 1),
 (3, '2024-07-01', 105, 122.25, 1),
@@ -151,6 +150,22 @@ VALUES
 (4, '2024-08-05', 110, 120.40, 1),
 (3, '2024-08-12', 80, 38.95, 1),
 (2, '2024-08-19', 65, 249.60, 1);
+
+-- 5 selling transactions spread over 4 weeks
+(1, '2024-08-30', -50, 152.30, 1),  -- Sell 50 AAPL shares, 225 remaining
+(2, '2024-09-05', -40, 247.00, 1),  -- Sell 40 MSFT shares, 20 remaining
+(4, '2024-09-12', -10, 123.00, 1),  -- Sell 30 JPM shares, 120 remaining
+(3, '2024-09-19', -60, 39.30, 1),   -- Sell 60 PFE shares, 220 remaining
+(1, '2024-09-25', -15, 150.60, 1),  -- Sell 75 AAPL shares, 150 remaining
+
+-- Additional selling transactions considering the stock availability
+-- Ensuring not selling shares beyond what the user owns
+(5, '2024-07-15', -130, 101.10, 1),  -- Sell 130 PG shares, 240 remaining
+(5, '2024-04-29', -60, 101.50, 1),  -- Sold 60 PG shares, 180 remaining
+(6, '2024-06-17', -95, 143.95, 1),  -- Sell 95 XOM shares, 0 remaining
+(2, '2024-06-03', -85, 249.50, 1),  -- Sell 85 MSFT shares, 35 remaining
+(3, '2024-06-10', -90, 100.75, 1), -- Sell 90 PFE shares, 130 remaining
+(2, '2024-03-04', -55, 248.95, 1); -- Sell 55 MSFT shares, 0 remaining
 
  /*######################### Drop Tables #####################*/
 -- DROP TABLE IF EXISTS Watchlist;
