@@ -34,12 +34,66 @@ async function getStockPriceData(ticker, interval, start, end) {
         //     });
         //     //return data;
         // }
-        console.log(data.quotes)
+        console.log(data)
         return data;
     } catch (error) {
         console.error('BrowseScript: Error fetching data:', error);
     }
 };
+async function getStockDatesPrices(ticker, interval, start, end) {
+    try {
+        const data = await yahooFinance.chart(ticker, {
+            interval,
+            period1: start,
+            period2: end,
+        });
+
+        // Extract dates and close prices
+        const dates = [];
+        const closePrices = [];
+
+        // Helper function to get the previous Friday's price
+        const getPreviousFriday = (date) => {
+            const d = new Date(date);
+            d.setDate(d.getDate() - (d.getDay() + 2) % 7); // Get the previous Friday
+            return d.toISOString().split('T')[0];
+        };
+
+        // Create a map for the available dates and close prices
+        const dataMap = new Map();
+        data.quotes.forEach(quote => {
+            const date = new Date(quote.date).toISOString().split('T')[0]; // Extract date as string
+            dataMap.set(date, quote.close.toFixed(2)); // Format price to two decimal places
+        });
+
+        // Iterate over the date range and fill in missing dates
+        let currentDate = new Date(start);
+        const endDate = new Date(end);
+        
+        while (currentDate <= endDate) {
+            const formattedDate = currentDate.toISOString().split('T')[0];
+            if (dataMap.has(formattedDate)) {
+                dates.push(formattedDate);
+                closePrices.push(dataMap.get(formattedDate));
+            } else {
+                // If date is missing, use the previous Friday's close price
+                const previousFridayDate = getPreviousFriday(currentDate);
+                if (dataMap.has(previousFridayDate)) {
+                    dates.push(formattedDate);
+                    closePrices.push(dataMap.get(previousFridayDate));
+                }
+            }
+            currentDate.setDate(currentDate.getDate() + 1); // Move to next day
+        }
+
+        return { dates, closePrices };
+    } catch (error) {
+        console.error('BrowseScripts: Error fetching stock dates and prices:', error);
+        throw error;
+    }
+}
+
+
 
 async function getWatchlist() {
     try {
@@ -191,5 +245,6 @@ module.exports = {
     deleteStockFromWatchlist,
     addStockToWatchlist,
     getTopGainers,
-    getTopLosers
+    getTopLosers,
+    getStockDatesPrices
 };
