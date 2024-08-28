@@ -110,7 +110,9 @@
                       </table>
 
 
-                  <a href="#" class="btn btn-primary" id="viewAllStock">View All</a>
+                    <div>
+                        <a href="#" class="btn btn-primary d-inline-block" id="viewAllStock">View All</a>
+                    </div>
                 </div>
               </div>
         </div>
@@ -237,7 +239,7 @@
                             })
                             .then(response => response.json())
                             .then(data => {
-                                const roundedBalance = parseFloat(data.user.balance).toFixed(2);
+                                const roundedBalance = (parseFloat(data.user.balance).toFixed(2)).toLocaleString();
                                 document.getElementById('freeCash').textContent = `$${parseFloat(roundedBalance).toLocaleString()}`;
                                 const fundsModal = bootstrap.Modal.getInstance(document.getElementById(modalId));
                                 if (fundsModal) {
@@ -265,7 +267,8 @@
                 fetch('./Dashboard/Balance?userId=1')
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('freeCash').textContent = `$${data.balance.toLocaleString()}`;
+
+                        document.getElementById('freeCash').textContent = `$${parseFloat(data.balance).toLocaleString()}`;
                     })
                     .catch(error => console.error('Error fetching balance data:', error));
             });
@@ -353,7 +356,7 @@
                 viewAllBtn.addEventListener("click", function (e) {
                     e.preventDefault();
                     showingAll = !showingAll;
-                    renderTable(stocksData, showingAll); // Use the stored stocksData instead of "data"
+                    renderTable(stocksData, showingAll); 
                 });
             });
         </script>
