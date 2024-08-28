@@ -17,7 +17,7 @@
                     <a class="nav-link" href="addFunds.html">Add Funds</a>
                 </li>
               </ul>
-              <form class="d-flex position-relative" role="search" onsubmit="return false;">
+              <form class="d-flex position-relative" role="search" onsubmit="return showStockDetailFromSearch()">
                 <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" id="searchBox" oninput="fetchSearchSuggestions()">
                 <button class="btn btn-outline-success" type="submit">Search</button>
                 <ul class="dropdown-menu position-absolute w-100" id="suggestionsList" style="display:none; z-index:1000;"></ul>
