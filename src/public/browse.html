@@ -95,7 +95,7 @@
         // Function to fetch and display top gainers
 // Function to fetch and display top gainers
 function fetchAndDisplayTopGainers() {
-    fetch('http://localhost:3000/Browse/top-gainers')
+    fetch('./Browse/top-gainers')
         .then(response => response.json())
         .then(data => {
             console.log(data);
@@ -113,7 +113,7 @@ function fetchAndDisplayTopGainers() {
 
 // Function to fetch and display top losers
 function fetchAndDisplayTopLosers() {
-    fetch('http://localhost:3000/Browse/top-losers')
+    fetch('./Browse/top-losers')
         .then(response => response.json())
         .then(data => {
             console.log(data);
@@ -242,7 +242,7 @@ async function fetchSearchSuggestions() {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`./SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
         const data = await response.json();
 
         const suggestions = data;
@@ -291,7 +291,7 @@ async function fetchSearchSuggestions() {
        // Function to fetch and display the watchlist
        async function fetchWatchlist() {
             try {
-                const response = await fetch('http://localhost:3000/Browse/watchlist');
+                const response = await fetch('./Browse/watchlist');
                 const data = await response.json();
                 const watchlistItems = document.getElementById('watchlistItems');
                 const additionalWatchlistItems = document.getElementById('additionalWatchlistItems');
@@ -348,7 +348,7 @@ async function showStockDetail(ticker) {
 
     try {
         // Fetch company profile
-        const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+        const profileResponse = await fetch(`./Stockinfo/Companyinfo?ticker=${ticker}`);
         if (!profileResponse.ok) {
             throw new Error(`Failed to fetch company profile for ${ticker}`);
         }
@@ -356,16 +356,16 @@ async function showStockDetail(ticker) {
         const profile = profileData.CompanyInfo;
 
         // Fetch watchlist data
-        const watchlistResponse = await fetch('http://localhost:3000/Browse/watchlist');
+        const watchlistResponse = await fetch('./Browse/watchlist');
         const watchlistData = await watchlistResponse.json();
         const stockData = watchlistData.find(stock => stock.ticker === ticker);
 
         // Fetch user balance
-        const balanceResponse = await fetch('http://localhost:3000/Dashboard/Balance?userId=1');
+        const balanceResponse = await fetch('./Dashboard/Balance?userId=1');
         const balanceData = await balanceResponse.json();
 
         // Fetch user's current share amount
-        const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
+        const shareAmountResponse = await fetch(`./Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
         const shareAmountData = await shareAmountResponse.json();
 
         // Update modal title with company logo, name, ticker, and Buy/Sell buttons
@@ -436,7 +436,7 @@ function showBuyModal(profile, stockData, userBalance) {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/Checkout/BuyStocks', {
+            const response = await fetch('./Checkout/BuyStocks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -481,7 +481,7 @@ function showSellModal(profile, stockData, userShares) {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/Checkout/SellStocks', {
+            const response = await fetch('./Checkout/SellStocks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -532,7 +532,7 @@ function showSellModal(profile, stockData, userShares) {
         // Function to remove a stock from the watchlist
         async function removeFromWatchlist(watchID, buttonElement) {
             try {
-                const response = await fetch(`http://localhost:3000/Browse/watchlist/delete?watchID=${watchID}`, {
+                const response = await fetch(`./Browse/watchlist/delete?watchID=${watchID}`, {
                     method: 'DELETE',
                 });
 
