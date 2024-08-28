@@ -23,8 +23,9 @@ async function getTotalInvestment() {
 
 async function getCurrentStockPrice(ticker) {
     try {
+        /*
         var api_key = finnhub.ApiClient.instance.authentications['api_key'];
-        api_key.apiKey = process.env.FINNHUB_API_KEY;
+        api_key.apiKey = process.env.FINNHUB_API_KEY_3;
         const finnhubClient = new finnhub.DefaultApi()
 
         return new Promise((resolve, reject) => {
@@ -37,6 +38,14 @@ async function getCurrentStockPrice(ticker) {
                 resolve(latestPrice);  // Resolve the promise with the latest price
             });
         });
+        */
+
+        const quote = await yahooFinance.quote(ticker);
+
+        // Extract the current price from the quote response
+        const latestPrice = quote.regularMarketPrice;
+
+        return latestPrice;
 
     } catch (error) {
       console.error(`Error fetching stock price for ${ticker}:`, error);
@@ -186,14 +195,15 @@ async function getAllStocks(userId, date, flag=0)
             if (flag === 0) {
                 // Get the current price from Finnhub
                 currentPrice = await getCurrentStockPrice(ticker);
+                currentPrice = parseFloat(currentPrice).toFixed(2)
             }
             else
             {
-                currentPrice = getStockPriceData(ticker, interval = "1d", date, date)
+                currentPrice = parseFloat(getStockPriceData(ticker, interval = "1d", date, date)).toFixed(2);
             }
 
             // Calculate the total market value
-            const marketValue = currentPrice * parseInt(totalShares);
+            const marketValue = parseFloat(currentPrice * parseInt(totalShares)).toFixed(2);
 
             return {
                 stock_id,
