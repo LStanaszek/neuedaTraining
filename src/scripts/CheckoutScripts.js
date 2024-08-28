@@ -24,6 +24,9 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
             throw new Error(`Unable to retrieve current stock price for ticker ${ticker}`);
         }
 
+        // Convert stock price to 2 decimal places
+        const formattedStockPrice = parseFloat(currentStockPrice).toFixed(2);
+
         // Calculate the total cost of the stocks to be purchased
         const totalCost = share_quantity * currentStockPrice;//use the current stock price - getCurrentStockPrice function
 
@@ -70,11 +73,14 @@ async function purchaseStocks(ticker, share_quantity, user_id) {
            
         const stock_id = stock.dataValues.stock_id;
 
+        // Convert share quantity to 2 decimal places
+        const formattedShareQuantity = parseFloat(share_quantity).toFixed(2);
+
         // Create a new transaction for buying stocks
         const newTransaction = await Transaction.create({
             stock_id: stock_id,
-            share_quantity: share_quantity, // Positive for buying
-            stock_price: currentStockPrice,
+            share_quantity: formattedShareQuantity, // Positive for buying
+            stock_price: formattedStockPrice,
             user_id: user_id,
             trade_timestamp: new Date(), // Sequelize automatically handles the current timestamp
         }, { transaction: t });
@@ -134,14 +140,20 @@ async function sellStocks(stock_id, share_quantity, user_id) {
         // Get the current stock price using the ticker symbol
         const currentStockPrice = await getCurrentStockPrice(stock.ticker);
 
+        // Format the current stock price to 2 decimal places
+        const formattedStockPrice = parseFloat(currentStockPrice).toFixed(2);
+
+        // Format the share quantity to 2 decimal places
+        const formattedShareQuantity = parseFloat(share_quantity).toFixed(2);
+
         // Calculate the total credit from the shares sold
-        const totalCredit = share_quantity * currentStockPrice;
+        const totalCredit = formattedShareQuantity * formattedStockPrice;
 
         // Create a new transaction for selling stocks
         const newTransaction = await Transaction.create({
             stock_id: stock_id,
-            share_quantity: -share_quantity, // Negative for selling
-            stock_price: currentStockPrice,
+            share_quantity: -formattedShareQuantity, // Negative for selling
+            stock_price: formattedStockPrice,
             user_id: user_id,
             trade_timestamp: new Date(), // Sequelize automatically handles the current timestamp
         }, { transaction: t });
