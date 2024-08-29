@@ -562,7 +562,7 @@ async function showSearchResult(ticker) {
 
     try {
         // Fetch company profile
-        const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+        const profileResponse = await fetch(`./Stockinfo/Companyinfo?ticker=${ticker}`);
         if (!profileResponse.ok) {
             console.log("ERROR");
             throw new Error(`Failed to fetch company profile for ${ticker}`);
@@ -573,14 +573,14 @@ async function showSearchResult(ticker) {
         
         // Fetch user balance
        
-        const balanceResponse = await fetch('http://localhost:3000/Dashboard/Balance?userId=1');
+        const balanceResponse = await fetch('./Dashboard/Balance?userId=1');
         const balanceData = await balanceResponse.json();
         console.log(balanceData.balance);
         // Fetch user's current share amount
-        const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
+        const shareAmountResponse = await fetch(`./Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
         const shareAmountData = await shareAmountResponse.json();
 
-        const priceandgrowth= await fetch(`http://localhost:3000/Stockinfo/GetPriceAndGrowth/?ticker=${ticker}`);
+        const priceandgrowth= await fetch(`./Stockinfo/GetPriceAndGrowth/?ticker=${ticker}`);
         const pricegrowthdata= await priceandgrowth.json();
         
         // Update modal title with company logo, name, ticker, and Buy/Sell buttons
