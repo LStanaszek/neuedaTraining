@@ -278,15 +278,16 @@
         <!-- FETCH PERFORMANCE STATS -->
         <script>
             fetch('./Dashboard/PerformanceIndicators')
-                .then(response => response.json())
-                .then(data => {
-                    // Update performance indicators
-                    document.getElementById('totalInvestment').textContent = `$${data.moneyIn.toLocaleString()}`;
-                    document.getElementById('totalValue').textContent = `$${data.valuation.toLocaleString()}`;
-                    document.getElementById('totalGrowth').textContent = `$${data.growthAbsolute.toLocaleString()}`;
-                    document.getElementById('growthPercentage').textContent = `${data.growthPercent.toLocaleString()}%`;
-                })
-                .catch(error => console.error('Error fetching performance data:', error));
+            .then(response => response.json())
+            .then(data => {
+                // Format and update performance indicators
+                document.getElementById('totalInvestment').textContent = `$${parseFloat(data.moneyIn).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                document.getElementById('totalValue').textContent = `$${parseFloat(data.valuation).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                document.getElementById('totalGrowth').textContent = `$${parseFloat(data.growthAbsolute).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                document.getElementById('growthPercentage').textContent = `${data.growthPercent.toLocaleString()}%`;
+            })
+            .catch(error => console.error('Error fetching performance data:', error));
+        
         </script>
 
 
