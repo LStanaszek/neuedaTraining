@@ -576,7 +576,7 @@ async function showSearchResult(ticker) {
         const profile = profileData.CompanyInfo;
         console.log("888888888888888");
         
-        // Fetch user balance
+        // Fetch user balance api
        
         const balanceResponse = await fetch('http://localhost:3000/Dashboard/Balance?userId=1');
         const balanceData = await balanceResponse.json();
@@ -641,6 +641,7 @@ async function showSearchResult(ticker) {
             } else {
                 console.error("Chart elements are not ready.");
             }
+            
         });
         
         // Remove previous event listeners before adding new ones
