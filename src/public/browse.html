@@ -131,7 +131,6 @@
             ]
         };
 
-        /*
         // Function to fetch and display top gainers
 // Function to fetch and display top gainers
 function fetchAndDisplayTopGainers() {
@@ -150,9 +149,8 @@ function fetchAndDisplayTopGainers() {
             populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
         });
 }
-*/
+
 // Function to fetch and display top losers
-/*
 function fetchAndDisplayTopLosers() {
     fetch('./Browse/top-losers')
         .then(response => response.json())
@@ -168,13 +166,11 @@ function fetchAndDisplayTopLosers() {
             console.error('Error fetching top losers:', error);
             populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
         });
-}
-*/
+    }
 
-function fetchAndDisplayTopGainers(){};
-function fetchAndDisplayTopLosers(){};
+//function fetchAndDisplayTopGainers(){};
+//function fetchAndDisplayTopLosers(){};
         
-
 // Function to populate stock lists with styling based on growth
 function populateStockListBackend(stockList, mainListId, additionalListId) {
     const mainList = document.getElementById(mainListId);
