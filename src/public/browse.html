@@ -359,6 +359,8 @@ async function fetchSearchSuggestions() {
 // Function to show stock details in the modal
 // Function to show stock details in the modal
 // Function to show stock details in the modal
+
+let chartInstance = null;
 async function showStockDetail(ticker) {
     const modalDetailContent = document.getElementById('modalDetailContent');
     const modalTitle = document.getElementById('stockDetailModalLabel');
@@ -435,8 +437,11 @@ async function showStockDetail(ticker) {
 
             if (graphHolder && selector) {
                 // Initialize the chart after the modal is fully shown
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
                 const userId = "1";
-                createPortfolioChart("stockGraphHolder", "stock", userId, `${profile.ticker} Performance`, "stockGraphSelector", profile.ticker, 15);
+                chartInstance = createPortfolioChart("stockGraphHolder", "stock", userId, `${profile.ticker} Performance`, "stockGraphSelector", profile.ticker, 15);
             } else {
                 console.error("Chart elements are not ready.");
             }
@@ -601,11 +606,42 @@ async function showSearchResult(ticker) {
             <p><strong>Exchange:</strong> ${profile.exchange}</p>
             <p><strong>Phone:</strong> ${profile.phone}</p>
             <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
+
+            <div class="card position-relative">
+                <canvas id="stockGraphHolder" style="height: 300px"></canvas>
+                <div class="position-absolute end-0 p-2">
+                    <div class="dropdown">
+                        <select class="form-select-sm" id="stockGraphSelector"> 
+                            <option value="1w">1W</option>
+                            <option value="1m">1M</option>
+                            <option value="6m">6M</option>
+                            <option value="1y" selected>1Y</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         `;
        
-        //Show the modal
+        // Show the modal
         const stockDetailModal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
         stockDetailModal.show();
+
+        // Wait for the modal to fully open before initializing the chart
+        document.getElementById('stockDetailModal').addEventListener('shown.bs.modal', function () {
+            const graphHolder = document.getElementById('stockGraphHolder');
+            const selector = document.getElementById('stockGraphSelector');
+
+            if (graphHolder && selector) {
+                // Initialize the chart after the modal is fully shown
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+                const userId = "1";
+                chartInstance = createPortfolioChart("stockGraphHolder", "stock", userId, `${profile.ticker} Performance`, "stockGraphSelector", profile.ticker, 15);
+            } else {
+                console.error("Chart elements are not ready.");
+            }
+        });
         
         // Remove previous event listeners before adding new ones
         document.getElementById('buyButton').replaceWith(document.getElementById('buyButton').cloneNode(true));
