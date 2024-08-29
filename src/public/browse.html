@@ -576,8 +576,9 @@ async function showSearchResult(ticker) {
         // Fetch user's current share amount
         const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
         const shareAmountData = await shareAmountResponse.json();
-       
-        console.log(shareAmountData.netShares);
+
+        const priceandgrowth= await fetch(`http://localhost:3000/Stockinfo/GetPriceAndGrowth/?ticker=${ticker}`);
+        const pricegrowthdata= await priceandgrowth.json();
         
         // Update modal title with company logo, name, ticker, and Buy/Sell buttons
         modalTitle.innerHTML = `
@@ -588,13 +589,14 @@ async function showSearchResult(ticker) {
                 <button class="btn btn-danger btn-sm" id="sellButton">Sell</button>
             </div>
         `;
-
         
         // Update modal content with current price, growth, balance, and shares owned
         modalDetailContent.innerHTML = `
             <p><strong>Your Balance:</strong> $${balanceData.balance}</p>
             <p><strong>Your Shares:</strong> ${shareAmountData.netShares} shares</p>
             <p><strong>Country:</strong> ${profile.country}</p>
+            <p><strong>Current Price:</strong> ${pricegrowthdata.priceAndGrowth.currentPrice}</p>
+            <p><strong>Growth:</strong> ${pricegrowthdata.priceAndGrowth.growth}</p>
             <p><strong>Exchange:</strong> ${profile.exchange}</p>
             <p><strong>Phone:</strong> ${profile.phone}</p>
             <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
