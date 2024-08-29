@@ -34,7 +34,7 @@ async function getStockDatesPrices(ticker, interval, start, end) {
 
         // Extract dates and close prices
         const dates = [];
-        const closePrices = [];
+        const valuations = [];
 
         // Helper function to get the previous Friday's price
         const getPreviousFriday = (date) => {
@@ -58,19 +58,19 @@ async function getStockDatesPrices(ticker, interval, start, end) {
             const formattedDate = currentDate.toISOString().split('T')[0];
             if (dataMap.has(formattedDate)) {
                 dates.push(formattedDate);
-                closePrices.push(dataMap.get(formattedDate));
+                valuations.push(dataMap.get(formattedDate));
             } else {
                 // If date is missing, use the previous Friday's close price
                 const previousFridayDate = getPreviousFriday(currentDate);
                 if (dataMap.has(previousFridayDate)) {
                     dates.push(formattedDate);
-                    closePrices.push(dataMap.get(previousFridayDate));
+                    valuations.push(dataMap.get(previousFridayDate));
                 }
             }
             currentDate.setDate(currentDate.getDate() + 1); // Move to next day
         }
 
-        return { dates, closePrices };
+        return { dates, valuations };
     } catch (error) {
         console.error('BrowseScripts: Error fetching stock dates and prices:', error);
         throw error;
