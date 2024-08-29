@@ -372,6 +372,8 @@ async function showStockDetail(ticker) {
         const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
         const shareAmountData = await shareAmountResponse.json();
 
+        console.log(shareAmountData.netShares);
+
         // Update modal title with company logo, name, ticker, and Buy/Sell buttons
         modalTitle.innerHTML = `
             <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
@@ -388,7 +390,7 @@ async function showStockDetail(ticker) {
             <p><strong>Growth Today:</strong> ${stockData.growth_today}%</p>
             <hr>
             <p><strong>Your Balance:</strong> $${balanceData.balance}</p>
-            <p><strong>Your Shares:</strong> ${shareAmountData.ticker} shares</p>
+            <p><strong>Your Shares:</strong> ${shareAmountData.netShares} shares</p>
             <p><strong>Country:</strong> ${profile.country}</p>
             <p><strong>Exchange:</strong> ${profile.exchange}</p>
             <p><strong>Phone:</strong> ${profile.phone}</p>
@@ -526,7 +528,7 @@ async function showSearchResult(ticker) {
         }
         const profileData = await profileResponse.json();
         const profile = profileData.CompanyInfo;
-console.log("888888888888888");
+        console.log("888888888888888");
         
         // Fetch user balance
        
@@ -537,7 +539,7 @@ console.log("888888888888888");
         const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
         const shareAmountData = await shareAmountResponse.json();
        
-        console.log(shareAmountData.ticker);
+        console.log(shareAmountData.netShares);
         
         // Update modal title with company logo, name, ticker, and Buy/Sell buttons
         modalTitle.innerHTML = `
@@ -553,7 +555,7 @@ console.log("888888888888888");
         // Update modal content with current price, growth, balance, and shares owned
         modalDetailContent.innerHTML = `
             <p><strong>Your Balance:</strong> $${balanceData.balance}</p>
-            <p><strong>Your Shares:</strong> ${shareAmountData.ticker} shares</p>
+            <p><strong>Your Shares:</strong> ${shareAmountData.netShares} shares</p>
             <p><strong>Country:</strong> ${profile.country}</p>
             <p><strong>Exchange:</strong> ${profile.exchange}</p>
             <p><strong>Phone:</strong> ${profile.phone}</p>
@@ -568,116 +570,25 @@ console.log("888888888888888");
         document.getElementById('buyButton').replaceWith(document.getElementById('buyButton').cloneNode(true));
         document.getElementById('sellButton').replaceWith(document.getElementById('sellButton').cloneNode(true));
 
-       // Add event listeners for Buy and Sell buttons
-       document.getElementById('buyButton').addEventListener('click', function() {
+        // Add event listeners for Buy and Sell buttons
+        document.getElementById('buyButton').addEventListener('click', function() {
             stockDetailModal.hide(); // Hide the View Detail modal
-            showBuyModal(profile, balanceData.balance);
+            showBuyModal(profile, stockData, balanceData.balance);
         });
 
         document.getElementById('sellButton').addEventListener('click', function() {
             stockDetailModal.hide(); // Hide the View Detail modal
-            showSellModal(profile, shareAmountData.shares || 0);
+            showSellModal(profile, stockData, shareAmountData.ticker);
         });
+
+        console.log('error finush');
 
     } catch (error) {
         modalDetailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
     }
 }
    
-        // Show Buy Modal for search modal
-function showBuyModal(profile, userBalance) {
-    const buyStockModal = new bootstrap.Modal(document.getElementById('buyStockModal'));
-
-    // Populate the Buy modal with company details
-    document.getElementById('buyCompanyName').textContent = profile.name;
-    document.getElementById('buyTicker').textContent = profile.ticker;
-    document.getElementById('buyPrice').textContent = profile.current_price;
-    document.getElementById('userBalance').textContent = userBalance;
-
-    // Remove previous event listener before adding a new one
-    document.getElementById('confirmBuyButton').replaceWith(document.getElementById('confirmBuyButton').cloneNode(true));
-
-    document.getElementById('confirmBuyButton').addEventListener('click', async function() {
-        const shareQuantity = parseInt(document.getElementById('buyQuantity').value, 10);
-        if (isNaN(shareQuantity) || shareQuantity <= 0) {
-            alert('Please enter a valid number of shares.');
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:3000/Checkout/BuyStocks', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ticker: profile.ticker,
-                    share_quantity: shareQuantity,
-                    user_id: 1, // Default user ID
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to purchase stocks.');
-            }
-
-            const data = await response.json();
-            buyStockModal.hide();
-            alert('Your purchase is successful!');
-        } catch (error) {
-            alert('Error purchasing stocks: ' + error.message);
-        }
-    });
-
-    buyStockModal.show();
-}
-
-// Show Sell Modal for search modal
-function showSellModal(profile, userShares) {
-    const sellStockModal = new bootstrap.Modal(document.getElementById('sellStockModal'));
-
-    // Populate the Sell modal with company details
-    document.getElementById('sellCompanyName').textContent = profile.name;
-    document.getElementById('sellTicker').textContent = profile.ticker;
-    document.getElementById('sellPrice').textContent = profile.current_price;
-    document.getElementById('userShares').textContent = userShares;
-
-    document.getElementById('confirmSellButton').replaceWith(document.getElementById('confirmSellButton').cloneNode(true));
-
-    document.getElementById('confirmSellButton').addEventListener('click', async function() {
-        const shareQuantity = parseInt(document.getElementById('sellQuantity').value, 10);
-        if (isNaN(shareQuantity) || shareQuantity <= 0) {
-            alert('Please enter a valid number of shares.');
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:3000/Checkout/SellStocks', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ticker: profile.ticker,
-                    share_quantity: shareQuantity,
-                    user_id: 1, // Default user ID
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to sell stocks.');
-            }
-
-            const data = await response.json();
-            sellStockModal.hide();
-            alert('Your sale is successful!');
-        } catch (error) {
-            alert('Error selling stocks: ' + error.message);
-        }
-    });
-
-    sellStockModal.show();
-}
+        
         
         //show stock detail from search
      function showStockDetailFromSearch() {
@@ -744,7 +655,7 @@ function showSellModal(profile, userShares) {
     </div>
 
 
-<!-- Buy Stock Modal for watchlist view detail------------------------------------>
+<!-- Buy Stock Modal -->
 <div class="modal fade" id="buyStockModal" tabindex="-1" aria-labelledby="buyStockModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -767,7 +678,7 @@ function showSellModal(profile, userShares) {
     </div>
 </div>
 
-<!-- Sell Stock Modal for watchlist view detail---------------------------->
+<!-- Sell Stock Modal -->
 <div class="modal fade" id="sellStockModal" tabindex="-1" aria-labelledby="sellStockModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -838,4 +749,3 @@ function showSellModal(profile, userShares) {
     </div>
 </body>
 </html>
-

@@ -188,8 +188,10 @@ async function getShareAmount(userID, ticker) {
     try {
         // Find the stock ID associated with the passed ticker
         const stock = await Stock.findOne({ where: { ticker } });
+        
+        // If the stock doesn't exist in the database, return 0 for the ticker
         if (!stock) {
-            throw new Error('Stock not found');
+            return { ticker, netShares: 0 };
         }
 
         // Sum the total share quantity for the user and stock
@@ -198,19 +200,22 @@ async function getShareAmount(userID, ticker) {
                 [sequelize.fn('SUM', sequelize.col('share_quantity')), 'netShares']
             ],
             where: {
+                user_id: userID, // Ensure that the query is filtering by user ID
                 stock_id: stock.stock_id,
             }
         });
 
         // If no transactions are found, netShares should be 0
-        const netShares = result.get('netShares') || 0;
+        const netShares = result ? parseFloat(result.get('netShares')) || 0 : 0;
 
-        return { ticker: parseFloat(parseInt(netShares, 10)).toFixed(2) };
+        return { ticker, netShares: netShares.toFixed(2) };
     }
     catch (error) {
         console.error('Error fetching stocks for passed ticker:', error);
+        throw new Error('Error fetching stock information.');
     }
 }
+
 
 // Export the functions for use in other modules
 module.exports = {
