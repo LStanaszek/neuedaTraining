@@ -444,12 +444,12 @@ async function showStockDetail(ticker) {
         // Add event listeners for Buy and Sell buttons
         document.getElementById('buyButton').addEventListener('click', function() {
             stockDetailModal.hide(); // Hide the View Detail modal
-            showBuyModal(profile, stockData, balanceData.balance);
+            showBuyModal(profile, stockData.current_price, balanceData.balance);
         });
 
         document.getElementById('sellButton').addEventListener('click', function() {
             stockDetailModal.hide(); // Hide the View Detail modal
-            showSellModal(profile, stockData, shareAmountData.ticker);
+            showSellModal(profile, stockData.current_price, shareAmountData.ticker);
         });
 
     } catch (error) {
@@ -459,13 +459,13 @@ async function showStockDetail(ticker) {
 
 
 // Show Buy Modal
-function showBuyModal(profile, stockData, userBalance) {
+function showBuyModal(profile, current_price, userBalance) {
     const buyStockModal = new bootstrap.Modal(document.getElementById('buyStockModal'));
 
     // Populate the Buy modal with company details
     document.getElementById('buyCompanyName').textContent = profile.name;
     document.getElementById('buyTicker').textContent = profile.ticker;
-    document.getElementById('buyPrice').textContent = stockData.current_price;
+    document.getElementById('buyPrice').textContent = current_price;
     document.getElementById('userBalance').textContent = userBalance;
 
      // Remove previous event listener before adding a new one
@@ -507,14 +507,17 @@ function showBuyModal(profile, stockData, userBalance) {
 }
 
 // Show Sell Modal
-function showSellModal(profile, stockData, userShares) {
+function showSellModal(profile, current_price, userShares) {
     const sellStockModal = new bootstrap.Modal(document.getElementById('sellStockModal'));
 
     // Populate the Sell modal with company details
     document.getElementById('sellCompanyName').textContent = profile.name;
     document.getElementById('sellTicker').textContent = profile.ticker;
-    document.getElementById('sellPrice').textContent = stockData.current_price;
+    document.getElementById('sellPrice').textContent = current_price;
     document.getElementById('userShares').textContent = userShares;
+
+       // Remove previous event listener before adding a new one
+    document.getElementById('confirmSellButton').replaceWith(document.getElementById('confirmSellButton').cloneNode(true));
 
     document.getElementById('confirmSellButton').addEventListener('click', async function() {
         const shareQuantity = parseInt(document.getElementById('sellQuantity').value, 10);
@@ -576,8 +579,9 @@ async function showSearchResult(ticker) {
         // Fetch user's current share amount
         const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
         const shareAmountData = await shareAmountResponse.json();
-       
-        console.log(shareAmountData.netShares);
+
+        const priceandgrowth= await fetch(`http://localhost:3000/Stockinfo/GetPriceAndGrowth/?ticker=${ticker}`);
+        const pricegrowthdata= await priceandgrowth.json();
         
         // Update modal title with company logo, name, ticker, and Buy/Sell buttons
         modalTitle.innerHTML = `
@@ -588,13 +592,14 @@ async function showSearchResult(ticker) {
                 <button class="btn btn-danger btn-sm" id="sellButton">Sell</button>
             </div>
         `;
-
         
         // Update modal content with current price, growth, balance, and shares owned
         modalDetailContent.innerHTML = `
             <p><strong>Your Balance:</strong> $${balanceData.balance}</p>
             <p><strong>Your Shares:</strong> ${shareAmountData.netShares} shares</p>
             <p><strong>Country:</strong> ${profile.country}</p>
+            <p><strong>Current Price:</strong> ${pricegrowthdata.priceAndGrowth.currentPrice}</p>
+            <p><strong>Growth:</strong> ${pricegrowthdata.priceAndGrowth.growth}</p>
             <p><strong>Exchange:</strong> ${profile.exchange}</p>
             <p><strong>Phone:</strong> ${profile.phone}</p>
             <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
@@ -611,12 +616,12 @@ async function showSearchResult(ticker) {
         // Add event listeners for Buy and Sell buttons
         document.getElementById('buyButton').addEventListener('click', function() {
             stockDetailModal.hide(); // Hide the View Detail modal
-            showBuyModal(profile, stockData, balanceData.balance);
+            showBuyModal(profile, pricegrowthdata.priceAndGrowth.currentPrice, balanceData.balance);
         });
 
         document.getElementById('sellButton').addEventListener('click', function() {
             stockDetailModal.hide(); // Hide the View Detail modal
-            showSellModal(profile, stockData, shareAmountData.ticker);
+            showSellModal(profile, pricegrowthdata.priceAndGrowth.currentPrice, shareAmountData.ticker);
         });
 
         console.log('error finush');
