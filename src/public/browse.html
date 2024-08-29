@@ -517,7 +517,7 @@ function showSellModal(profile, current_price, userShares) {
     document.getElementById('userShares').textContent = userShares;
 
        // Remove previous event listener before adding a new one
-       document.getElementById('confirmSellButton').replaceWith(document.getElementById('confirmSellButton').cloneNode(true));
+    document.getElementById('confirmSellButton').replaceWith(document.getElementById('confirmSellButton').cloneNode(true));
 
     document.getElementById('confirmSellButton').addEventListener('click', async function() {
         const shareQuantity = parseInt(document.getElementById('sellQuantity').value, 10);
