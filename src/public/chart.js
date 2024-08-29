@@ -1,18 +1,26 @@
-function createPortfolioChart(canvasId, apiEndpoint, userId, title, selectorId, legend) {
+function createPortfolioChart(canvasId, apiEndpoint, userId, title, selectorId, legend, fontSize = 20) {
     const ctx = document.getElementById(canvasId).getContext('2d');
+
+    let finalAPI;
+    if (apiEndpoint === "portfolio"){
+        finalAPI = `./Dashboard/GetPerformanceGraphData?userId=${userId}&timeframe=3`;
+    }
+    else {
+        finalAPI = `/Browse/HistoricalDatesPrices?ticker=${legend}&timeframe=3`;
+    }
     
-    fetch(`${apiEndpoint}?userId=${userId}&timeframe=3`)
+    fetch(finalAPI)
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
-            initializeChart(ctx, data, title, selectorId, legend);
+            initializeChart(ctx, data, title, selectorId, legend, apiEndpoint, fontSize);
         })
         .catch(error => console.error('Error fetching graph data:', error));
 }
 
-function initializeChart(ctx, data, title, selectorId, legend) {
+function initializeChart(ctx, data, title, selectorId, legend, apiEndpoint, fontSize) {
     const down = (ctx, value) => ctx.p0.parsed.y > ctx.p1.parsed.y ? value : undefined;
     const portfolioChart = new Chart(ctx, {
         type: 'line',
@@ -37,7 +45,7 @@ function initializeChart(ctx, data, title, selectorId, legend) {
                     display: true,
                     text: title,
                     font: {
-                        size: 20
+                        size: fontSize
                     }
                 },
                 legend: {
@@ -62,6 +70,7 @@ function initializeChart(ctx, data, title, selectorId, legend) {
     }
 
     // Handle timeframe changes
+
     document.getElementById(selectorId).addEventListener('change', function() {
         const selectedTimeframe = this.value;
         let timeframe;
@@ -80,7 +89,15 @@ function initializeChart(ctx, data, title, selectorId, legend) {
                 break;
         }
 
-        fetch(`${apiEndpoint}?userId=${userId}&timeframe=${timeframe}`)
+        let finalAPI;
+        if (apiEndpoint === "portfolio"){
+            finalAPI = `./Dashboard/GetPerformanceGraphData?userId=${userId}&timeframe=${timeframe}`;
+        }
+        else {
+            finalAPI = `/Browse/HistoricalDatesPrices?ticker=${legend}&timeframe=${timeframe}`;
+        }
+
+        fetch(finalAPI)
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 return response.json();
