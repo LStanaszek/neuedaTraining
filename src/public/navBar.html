@@ -1,4 +1,34 @@
 <!--/src/public/navBar.html file-->
+<!--
+<nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="index.html" style="font-size:35px; font-weight:bold;">InvestEd</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="nav nav-pills me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="index.html">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">Browse</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="addFunds.html">Add Funds</a>
+                </li>
+              </ul>
+              <form class="d-flex position-relative" role="search" onsubmit="return showStockDetailFromSearch()">
+                <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" id="searchBox" oninput="fetchSearchSuggestions()">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+                <ul class="dropdown-menu position-absolute w-100" id="suggestionsList" style="display:none; z-index:1000;"></ul>
+            </form>
+        </div>
+    </div>
+</nav>
+-->
+
+<!--/src/public/navBar.html file-->
 <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary border-bottom">
     <div class="container-fluid">
         <a class="navbar-brand" href="index.html" style="font-size:35px; font-weight:bold;">InvestEd</a>
@@ -27,8 +57,8 @@
                 </div>
             </div>
 
-              <form class="d-flex position-relative ms-3" role="search" onsubmit="return false;">
-                <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" id="searchBox" oninput="fetchSearchSuggestions()">
+            <form class="d-flex position-relative ms-3" role="search" onsubmit="return showStockDetailFromSearch()">
+                <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" id="searchBox" autocomplete="off" oninput="fetchSearchSuggestions()">
                 <button class="btn btn-outline-success" type="submit">Search</button>
                 <ul class="dropdown-menu position-absolute w-100" id="suggestionsList" style="display:none; z-index:1000;"></ul>
             </form>
@@ -36,5 +66,3 @@
     </div>
 </nav>
 
-
-    

@@ -6,6 +6,34 @@
     <title>InvestEd Browse</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
+        /* Ensure that the search box and dropdown menu are in the same container */
+ .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        #suggestionsList {
+    width: 100%;
+    position: relative;
+    margin-top: 50px; /* Adds space below the search box */
+    z-index: 1000;
+    display: none; /* Initially hidden */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: adds a shadow for better visibility */
+}
+
+        /* Ensure dropdown items fill the width of the dropdown menu */
+        #suggestionsList .dropdown-item {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+
+                        /* Prevent text from overflowing */
+                        overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
                 #suggestionsList .dropdown-item {
             padding: 0.5rem 1rem;
             cursor: pointer;
@@ -17,7 +45,7 @@
         }
 
         #suggestionsList .dropdown-item strong {
-            color: #007bff;
+            color: #0D6EFD;
         }
 
         #suggestionsList .dropdown-item span {
@@ -39,7 +67,8 @@
 </head>
 <body>
     <div id="navbar"></div>
-    <h1></h1>
+    <div id="addFundsContainer"></div>
+    <div id="drawFundsContainer"></div>
     <div id="modal-container"></div> <!-- Placeholder for the modal -->
 
     <script>
@@ -73,6 +102,15 @@
                 console.error('Error loading modal:', error);
             });
 
+            fetch('./modal2.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('modal-container').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error loading modal:', error);
+            });
+
 
 
         // Hard-coded fallback data
@@ -91,10 +129,11 @@
             ]
         };
 
+        /*
         // Function to fetch and display top gainers
 // Function to fetch and display top gainers
 function fetchAndDisplayTopGainers() {
-    fetch('http://localhost:3000/Browse/top-gainers')
+    fetch('./Browse/top-gainers')
         .then(response => response.json())
         .then(data => {
             console.log(data);
@@ -109,10 +148,11 @@ function fetchAndDisplayTopGainers() {
             populateStockListFallback(fallbackData.top_gainers, 'topStocksItems', 'additionalTopStocksItems');
         });
 }
-
+*/
 // Function to fetch and display top losers
+/*
 function fetchAndDisplayTopLosers() {
-    fetch('http://localhost:3000/Browse/top-losers')
+    fetch('./Browse/top-losers')
         .then(response => response.json())
         .then(data => {
             console.log(data);
@@ -127,7 +167,7 @@ function fetchAndDisplayTopLosers() {
             populateStockListFallback(fallbackData.top_losers, 'worstStocksItems', 'additionalWorstStocksItems');
         });
 }
-
+*/
         
 
 // Function to populate stock lists with styling based on growth
@@ -161,14 +201,16 @@ function populateStockListBackend(stockList, mainListId, additionalListId) {
         listItem.className = 'list-group-item';
 
         listItem.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span>${name} (${ticker})</span>
-                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                </div>
-            </div>
-        `;
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span>${name} (${ticker})</span>
+        </div>
+        <div>
+            <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+            <span class="badge ${growthClass} ms-2">${growthToday}</span>
+        </div>
+    </div>
+`;
 
         if (index < 3) {
             mainList.appendChild(listItem);
@@ -207,15 +249,17 @@ function populateStockListFallback(stockList, mainListId, additionalListId) {
         const listItem = document.createElement('li');
         listItem.className = 'list-group-item';
 
-        listItem.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span>${name} (${ticker})</span>
-                    <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                    <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                </div>
-            </div>
-        `;
+listItem.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span>${name} (${ticker})</span>
+        </div>
+        <div>
+            <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+            <span class="badge ${growthClass} ms-2">${growthToday}</span>
+        </div>
+    </div>
+`;
 
         if (index < 3) {
             mainList.appendChild(listItem);
@@ -237,7 +281,7 @@ async function fetchSearchSuggestions() {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`./SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
         const data = await response.json();
 
         const suggestions = data;
@@ -286,7 +330,7 @@ async function fetchSearchSuggestions() {
        // Function to fetch and display the watchlist
        async function fetchWatchlist() {
             try {
-                const response = await fetch('http://localhost:3000/Browse/watchlist');
+                const response = await fetch('./Browse/watchlist');
                 const data = await response.json();
                 const watchlistItems = document.getElementById('watchlistItems');
                 const additionalWatchlistItems = document.getElementById('additionalWatchlistItems');
@@ -309,19 +353,20 @@ async function fetchSearchSuggestions() {
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item';
 
-                    listItem.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span>${name} (${ticker})</span>
-                                <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
-                                <span class="badge ${growthClass} ms-2">${growthToday}</span>
-                            </div>
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-primary me-2" type="button" onclick="showStockDetail('${ticker}')">View Detail</button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
-                            </div>
-                        </div>
-                    `;
+listItem.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span>${name} (${ticker})</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-sm btn-outline-primary me-2" type="button" onclick="showStockDetail('${ticker}')">View Detail</button>
+            <button class="btn btn-sm btn-outline-danger me-2" onclick="removeFromWatchlist(${item.id}, this)">Remove</button>
+            <span class="badge bg-primary badge-pill ms-2">${currentPrice}</span>
+            <span class="badge ${growthClass} ms-2">${growthToday}</span>
+        </div>
+    </div>
+`;
+
 
                     if (index < 3) {
                         watchlistItems.appendChild(listItem);
@@ -336,13 +381,14 @@ async function fetchSearchSuggestions() {
         // Function to show stock details in the modal
 // Function to show stock details in the modal
 // Function to show stock details in the modal
+// Function to show stock details in the modal
 async function showStockDetail(ticker) {
     const modalDetailContent = document.getElementById('modalDetailContent');
     const modalTitle = document.getElementById('stockDetailModalLabel');
 
     try {
         // Fetch company profile
-        const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+        const profileResponse = await fetch(`./Stockinfo/Companyinfo?ticker=${ticker}`);
         if (!profileResponse.ok) {
             throw new Error(`Failed to fetch company profile for ${ticker}`);
         }
@@ -350,17 +396,19 @@ async function showStockDetail(ticker) {
         const profile = profileData.CompanyInfo;
 
         // Fetch watchlist data
-        const watchlistResponse = await fetch('http://localhost:3000/Browse/watchlist');
+        const watchlistResponse = await fetch('./Browse/watchlist');
         const watchlistData = await watchlistResponse.json();
         const stockData = watchlistData.find(stock => stock.ticker === ticker);
 
         // Fetch user balance
-        const balanceResponse = await fetch('http://localhost:3000/Dashboard/Balance?userId=1');
+        const balanceResponse = await fetch('./Dashboard/Balance?userId=1');
         const balanceData = await balanceResponse.json();
 
         // Fetch user's current share amount
-        const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
+        const shareAmountResponse = await fetch(`./Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
         const shareAmountData = await shareAmountResponse.json();
+
+        console.log(shareAmountData.netShares);
 
         // Update modal title with company logo, name, ticker, and Buy/Sell buttons
         modalTitle.innerHTML = `
@@ -378,7 +426,7 @@ async function showStockDetail(ticker) {
             <p><strong>Growth Today:</strong> ${stockData.growth_today}%</p>
             <hr>
             <p><strong>Your Balance:</strong> $${balanceData.balance}</p>
-            <p><strong>Your Shares:</strong> ${shareAmountData.ticker} shares</p>
+            <p><strong>Your Shares:</strong> ${shareAmountData.netShares} shares</p>
             <p><strong>Country:</strong> ${profile.country}</p>
             <p><strong>Exchange:</strong> ${profile.exchange}</p>
             <p><strong>Phone:</strong> ${profile.phone}</p>
@@ -393,13 +441,14 @@ async function showStockDetail(ticker) {
         document.getElementById('buyButton').replaceWith(document.getElementById('buyButton').cloneNode(true));
         document.getElementById('sellButton').replaceWith(document.getElementById('sellButton').cloneNode(true));
 
-
         // Add event listeners for Buy and Sell buttons
         document.getElementById('buyButton').addEventListener('click', function() {
+            stockDetailModal.hide(); // Hide the View Detail modal
             showBuyModal(profile, stockData, balanceData.balance);
         });
 
         document.getElementById('sellButton').addEventListener('click', function() {
+            stockDetailModal.hide(); // Hide the View Detail modal
             showSellModal(profile, stockData, shareAmountData.ticker);
         });
 
@@ -430,7 +479,7 @@ function showBuyModal(profile, stockData, userBalance) {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/Checkout/BuyStocks', {
+            const response = await fetch('./Checkout/BuyStocks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -447,8 +496,8 @@ function showBuyModal(profile, stockData, userBalance) {
             }
 
             const data = await response.json();
-            alert(data.message);
             buyStockModal.hide();
+            alert('Your purchase is successful!');
         } catch (error) {
             alert('Error purchasing stocks: ' + error.message);
         }
@@ -475,7 +524,7 @@ function showSellModal(profile, stockData, userShares) {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/Checkout/SellStocks', {
+            const response = await fetch('./Checkout/SellStocks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -501,18 +550,89 @@ function showSellModal(profile, stockData, userShares) {
 
     sellStockModal.show();
 }
+        
 
 
+async function showSearchResult(ticker) {
+    const modalDetailContent = document.getElementById('modalDetailContent');
+    const modalTitle = document.getElementById('stockDetailModalLabel');
+
+    try {
+        // Fetch company profile
+        const profileResponse = await fetch(`http://localhost:3000/Stockinfo/Companyinfo?ticker=${ticker}`);
+        if (!profileResponse.ok) {
+            console.log("ERROR");
+            throw new Error(`Failed to fetch company profile for ${ticker}`);
+        }
+        const profileData = await profileResponse.json();
+        const profile = profileData.CompanyInfo;
+        console.log("888888888888888");
         
+        // Fetch user balance
+       
+        const balanceResponse = await fetch('http://localhost:3000/Dashboard/Balance?userId=1');
+        const balanceData = await balanceResponse.json();
+        console.log(balanceData.balance);
+        // Fetch user's current share amount
+        const shareAmountResponse = await fetch(`http://localhost:3000/Checkout/GetShareAmount?userId=1&ticker=${ticker}`);
+        const shareAmountData = await shareAmountResponse.json();
+       
+        console.log(shareAmountData.netShares);
         
+        // Update modal title with company logo, name, ticker, and Buy/Sell buttons
+        modalTitle.innerHTML = `
+            <img src="${profile.logo}" alt="${profile.name} logo" style="width: 30px; height: 30px; margin-right: 10px;">
+            ${profile.name} (${profile.ticker})
+            <div class="ms-auto">
+                <button class="btn btn-success btn-sm me-2" id="buyButton">Buy</button>
+                <button class="btn btn-danger btn-sm" id="sellButton">Sell</button>
+            </div>
+        `;
+
+        
+        // Update modal content with current price, growth, balance, and shares owned
+        modalDetailContent.innerHTML = `
+            <p><strong>Your Balance:</strong> $${balanceData.balance}</p>
+            <p><strong>Your Shares:</strong> ${shareAmountData.netShares} shares</p>
+            <p><strong>Country:</strong> ${profile.country}</p>
+            <p><strong>Exchange:</strong> ${profile.exchange}</p>
+            <p><strong>Phone:</strong> ${profile.phone}</p>
+            <p><strong>Website:</strong> <a href="${profile.weburl}" target="_blank">${profile.weburl}</a></p>
+        `;
+       
+        //Show the modal
+        const stockDetailModal = new bootstrap.Modal(document.getElementById('stockDetailModal'));
+        stockDetailModal.show();
+        
+        // Remove previous event listeners before adding new ones
+        document.getElementById('buyButton').replaceWith(document.getElementById('buyButton').cloneNode(true));
+        document.getElementById('sellButton').replaceWith(document.getElementById('sellButton').cloneNode(true));
+
+        // Add event listeners for Buy and Sell buttons
+        document.getElementById('buyButton').addEventListener('click', function() {
+            stockDetailModal.hide(); // Hide the View Detail modal
+            showBuyModal(profile, stockData, balanceData.balance);
+        });
+
+        document.getElementById('sellButton').addEventListener('click', function() {
+            stockDetailModal.hide(); // Hide the View Detail modal
+            showSellModal(profile, stockData, shareAmountData.ticker);
+        });
+
+        console.log('error finush');
+
+    } catch (error) {
+        modalDetailContent.innerHTML = `<p>Error loading company details. Please try again later.</p>`;
+    }
+}
+   
         
         
         //show stock detail from search
-        function showStockDetailFromSearch() {
+     function showStockDetailFromSearch() {
     const ticker = document.getElementById('searchBox').value.trim();
-    
     if (ticker) {
-        showStockDetail(ticker);
+        showSearchResult(ticker);
     } else {
         console.error('Search box is empty');
     }
@@ -521,12 +641,10 @@ function showSellModal(profile, stockData, userShares) {
 
 
 
-
-
         // Function to remove a stock from the watchlist
         async function removeFromWatchlist(watchID, buttonElement) {
             try {
-                const response = await fetch(`http://localhost:3000/Browse/watchlist/delete?watchID=${watchID}`, {
+                const response = await fetch(`./Browse/watchlist/delete?watchID=${watchID}`, {
                     method: 'DELETE',
                 });
 
@@ -545,8 +663,8 @@ function showSellModal(profile, stockData, userShares) {
         fetchAndDisplayTopGainers();
         fetchAndDisplayTopLosers();
         fetchWatchlist();
-        fetchSearchSuggestions();
-        showStockDetailFromSearch()
+        //fetchSearchSuggestions();
+        
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
@@ -667,5 +785,164 @@ function showSellModal(profile, stockData, userShares) {
             </div>
         </div>
     </div>
+
+    <!-- NAV BAR, ADD FUNDS, WITHDRAW FUNDS, FREE FUNDS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('./navBar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('navbar').innerHTML = data;
+    
+                    // Highlight active button
+                    let currentPath = window.location.pathname.split('/').pop();
+                    if (currentPath === '') {
+                        currentPath = 'index.html';
+                    }
+    
+                    const navLinks = document.querySelectorAll('.nav-link');
+                    navLinks.forEach(link => {
+                        if (link.getAttribute('href') === currentPath) {
+                            link.classList.add('active');
+                            link.setAttribute('aria-current', 'page');
+                        } else {
+                            link.classList.remove('active');
+                            link.removeAttribute('aria-current');
+                        }
+                    });
+    
+                    // Handle Add Funds button click
+                    const addFundsButton = document.querySelector('.addFundsButton');
+                    if (addFundsButton) {
+                        addFundsButton.addEventListener('click', function (e) {
+                            e.preventDefault();
+    
+                            fetch('addFunds.html')
+                                .then(response => response.text())
+                                .then(data => {
+                                    document.getElementById('addFundsContainer').innerHTML = data;
+                                    const addFundsModal = new bootstrap.Modal(document.getElementById('addFundsModal'));
+                                    addFundsModal.show();
+                                    
+                                    // Set up form submission handling
+                                    setupFundsForm("Add");
+                                })
+                                .catch(error => console.error('Error loading modal:', error));
+                        });
+                    }
+
+                    // Handle Withdraw Funds button click
+                    const drawFundsButton = document.querySelector('.drawFundsButton');
+                    if (drawFundsButton) {
+                        drawFundsButton.addEventListener('click', function (e) {
+                            e.preventDefault();
+    
+                            fetch('drawFunds.html')
+                                .then(response => response.text())
+                                .then(data => {
+                                    document.getElementById('drawFundsContainer').innerHTML = data;
+                                    const drawFundsModal = new bootstrap.Modal(document.getElementById('drawFundsModal'));
+                                    drawFundsModal.show();
+                                    
+                                    // Set up form submission handling
+                                    setupFundsForm("Withdraw", "fundsDrawAmount", "cardDrawNumber", "expiryDrawDate", "drawcvv");
+                                })
+                                .catch(error => console.error('Error loading modal:', error));
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching navbar:', error));
+    
+
+                function setupFundsForm(choice, amount = "fundsAmount", inputCardNumber = "cardNumber", inputExpiryDate = "expiryDate", inputCvv = "cvv") {
+                    let formId, apiEndpoint, modalId, submitButtonSelector;
+
+                    if (choice === "Add") {
+                        formId = "addFundsForm";
+                        apiEndpoint = "./Dashboard/AddFunds";
+                        modalId = "addFundsModal";
+                        submitButtonSelector = ".addFundsConfirm";
+                    } else if (choice === "Withdraw") {
+                        formId = "drawFundsForm";
+                        apiEndpoint = "./Dashboard/WithdrawFunds";
+                        modalId = "drawFundsModal";
+                        submitButtonSelector = ".drawFundsConfirm";
+                    }
+
+                    // Get the form element and replace it with a clone to remove old event listeners
+                    const fundsForm = document.getElementById(formId);
+                    if (!fundsForm) {
+                        console.error(`${choice} Funds Form not found`);
+                        return;
+                    }
+
+                    const clonedFundsForm = fundsForm.cloneNode(true); // Clone the form to reset listeners
+                    fundsForm.replaceWith(clonedFundsForm); // Replace the old form with the new cloned form
+
+                    // Add a new event listener to the cloned form
+                    clonedFundsForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+
+                        const fundsAmount = parseFloat(document.getElementById(amount).value); // Convert to float
+                        const cardNumber = document.getElementById(inputCardNumber).value;
+                        const expiryDate = document.getElementById(inputExpiryDate).value;
+                        const cvv = document.getElementById(inputCvv).value;
+
+                        if (isNaN(fundsAmount) || cardNumber === '' || expiryDate === '' || cvv === '') {
+                            alert('Please fill out all fields correctly');
+                            return;
+                        }
+
+
+                        fetch(apiEndpoint, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                user_id: 1,
+                                amount: fundsAmount // Pass as a number
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            const roundedBalance = (parseFloat(data.user.balance).toFixed(2)).toLocaleString();
+                            document.getElementById('freeCash').textContent = `$${parseFloat(roundedBalance).toLocaleString()}`;
+                            const fundsModal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                            if (fundsModal) {
+                                fundsModal.hide();
+                            }
+                        })
+                        .catch(error => {
+                            alert('Insufficient funds');
+                        });
+                    });
+
+                    // Add submit button functionality
+                    const fundsConfirmButton = document.querySelector(submitButtonSelector);
+                    if (fundsConfirmButton) {
+                        fundsConfirmButton.addEventListener('click', function () {
+                            clonedFundsForm.dispatchEvent(new Event('submit')); // Trigger the form submission programmatically
+                        });
+                    }
+                }
+
+                
+                
+    
+            // Fetch and display the free cash balance
+            fetch('./Dashboard/Balance?userId=1')
+                .then(response => response.json())
+                .then(data => {
+
+                    document.getElementById('freeCash').textContent = `$${parseFloat(data.balance).toLocaleString()}`;
+                })
+                .catch(error => console.error('Error fetching balance data:', error));
+        });
+    </script>
+
+
+
+
 </body>
 </html>

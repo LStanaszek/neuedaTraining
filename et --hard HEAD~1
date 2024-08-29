@@ -1,0 +1,468 @@
+[33mcommit c97f86e737c1ae794e45f85768ed67ce88e412cc[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Wed Aug 28 19:43:49 2024 +0000
+
+    price and growth api
+
+[33mcommit bed992bdd248e5888d3d020e401646c62abfeacf[m[33m ([m[1;31morigin/IE-96-get-current-price-and-growth-api[m[33m, [m[1;32mIE-96-get-current-price-and-growth-api[m[33m)[m
+Merge: 2261fcc 4e47d31
+Author: MMI7865 <101802684+MMI7865@users.noreply.github.com>
+Date:   Wed Aug 28 18:33:33 2024 +0100
+
+    Merge pull request #52 from LStanaszek/test23
+    
+    Docker file
+
+[33mcommit 4e47d31dd61063a081db0025b83fe02efdcbb1c2[m
+Author: User111 <test@gmail.com>
+Date:   Wed Aug 28 17:32:47 2024 +0000
+
+    Docker file
+
+[33mcommit 2261fcc311c510ef7cd15173add41ac531646a2f[m[33m ([m[1;31morigin/test23[m[33m)[m
+Author: MMI7865 <101802684+MMI7865@users.noreply.github.com>
+Date:   Wed Aug 28 17:26:59 2024 +0000
+
+    Create Dockerfile
+
+[33mcommit c684519eff01301de3137b0bae49daa7cd71af23[m
+Author: LStanaszek <97518209+LStanaszek@users.noreply.github.com>
+Date:   Wed Aug 28 16:52:04 2024 +0000
+
+    Create Presentation
+
+[33mcommit 4eeccb5027dbb3a9823e2c6c5f4755fe3b16e4e5[m[33m ([m[1;32mIE-debug[m[33m)[m
+Merge: 2e5754b ea9fe34
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Wed Aug 28 16:24:24 2024 +0000
+
+    Merge branch 'main' of https://github.com/LStanaszek/neuedaTraining
+
+[33mcommit 2e5754b954ead634c4d1fef45f3076a570d6bf9c[m
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Wed Aug 28 16:23:25 2024 +0000
+
+    changed current price api to yahoo finance
+
+[33mcommit ea9fe34d20878c3f5adc1b6179f31937f83613d3[m[33m ([m[1;31morigin/IE-94-Fix-search-bar[m[33m)[m
+Merge: 2679b6b 16feea9
+Author: majid-amjad <76595742+majid-amjad@users.noreply.github.com>
+Date:   Wed Aug 28 16:58:00 2024 +0100
+
+    Merge pull request #51 from LStanaszek/IE-93-link-pie-charts-to-BE
+    
+    connected pie charts to BE
+
+[33mcommit 16feea952839e9ee20f64d7902eb4f0d1288dda4[m[33m ([m[1;31morigin/IE-93-link-pie-charts-to-BE[m[33m)[m
+Author: majid-amjad <amjadmajid10@gmail.com>
+Date:   Wed Aug 28 16:57:41 2024 +0100
+
+    connected pie charts to BE
+
+[33mcommit 2679b6b4c570a156ac229eb954a37e3b01b59425[m
+Merge: 09b43ee f86806b
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Wed Aug 28 16:45:12 2024 +0100
+
+    Merge pull request #50 from LStanaszek/IE-92-Funds-absolute-value
+    
+    Ie 92 funds absolute value
+
+[33mcommit f86806b6cc3acbfe0e0209834c21e3ef240782b6[m[33m ([m[1;31morigin/IE-92-Funds-absolute-value[m[33m)[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 15:44:15 2024 +0000
+
+    Fixed a semicolon in dummy transaction data
+
+[33mcommit 6509dfc88ea65af7d60567b698e6c38fa1b930a1[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 15:42:53 2024 +0000
+
+    Added negative number checks to add/remove funds
+
+[33mcommit 09b43ee234ed1875e4fbbb67fe8e1a70fb6db0e6[m
+Author: majid-amjad <amjadmajid10@gmail.com>
+Date:   Wed Aug 28 16:33:24 2024 +0100
+
+    added dynamic colours to graph
+
+[33mcommit 291662c6fcab6c68d2f267bf17db032d001ea866[m[33m ([m[1;31morigin/IE-91-Search-company-info-v2[m[33m)[m
+Merge: 3850d7c 90b6a5d
+Author: majid-amjad <76595742+majid-amjad@users.noreply.github.com>
+Date:   Wed Aug 28 15:44:15 2024 +0100
+
+    Merge pull request #49 from LStanaszek/IE-77-create-wallet-page
+    
+    Ie 77 create wallet page
+
+[33mcommit 90b6a5d783834868c85c2c2702e67a9c7211cb1f[m[33m ([m[1;31morigin/IE-77-create-wallet-page[m[33m)[m
+Merge: 75f0404 3850d7c
+Author: majid-amjad <76595742+majid-amjad@users.noreply.github.com>
+Date:   Wed Aug 28 15:44:03 2024 +0100
+
+    Merge branch 'main' into IE-77-create-wallet-page
+
+[33mcommit 75f0404c1baab2bb7a6aaf7af64154904935036f[m
+Author: majid-amjad <amjadmajid10@gmail.com>
+Date:   Wed Aug 28 15:39:50 2024 +0100
+
+    added add/withdraw funds functionality
+
+[33mcommit 3850d7c5e0cb9a5523093dd2da809a5df4b2e2fc[m
+Merge: 89ca281 12adcc2
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Wed Aug 28 14:42:43 2024 +0100
+
+    Merge pull request #48 from LStanaszek/IE-86-Prepopulate-database
+    
+    Fixed 1 month plot view to show change and ensure not selling overstocks
+
+[33mcommit 12adcc2b3ed2902e2dcc409cc91b282c914337f3[m[33m ([m[1;31morigin/IE-86-Prepopulate-database[m[33m)[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 13:42:10 2024 +0000
+
+    Fixed 1 month plot view to show change and ensure not selling overstocks
+
+[33mcommit 89ca2813d2fecea30cf4408b4ae95569d28ef517[m[33m ([m[1;31morigin/IE-90-browse-update-version[m[33m)[m
+Merge: ad70190 8124621
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Wed Aug 28 14:26:02 2024 +0100
+
+    Merge pull request #47 from LStanaszek/IE-86-Prepopulate-database
+    
+    Added a selling trend downward slope
+
+[33mcommit 8124621bb41cc1c21c87da330947307739f2d71b[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 13:24:47 2024 +0000
+
+    Added a selling trend downward slope
+
+[33mcommit ad7019048e3e14f81f63aaae06857d961032144b[m
+Merge: be318f4 68af358
+Author: LStanaszek <97518209+LStanaszek@users.noreply.github.com>
+Date:   Wed Aug 28 13:16:11 2024 +0000
+
+    Merge pull request #46 from LStanaszek/IE-86-Prepopulate-database
+    
+    Added selling operations
+
+[33mcommit be318f450615683e4a18d4b196a147c2d2cc6c16[m
+Merge: 6177aba 22c5553
+Author: peipei376 <miachen0506@gmail.com>
+Date:   Wed Aug 28 13:10:26 2024 +0000
+
+    Merge pull request #45 from LStanaszek/IE-87-Connect-search-with-pop-up
+    
+    search bar pop up done
+
+[33mcommit 22c55535cc6e768ea8383d1167bf917e872b112c[m[33m ([m[1;31morigin/IE-87-Connect-search-with-pop-up[m[33m)[m
+Author: Peipei Chen <miachen0506@gmail.com>
+Date:   Wed Aug 28 13:09:13 2024 +0000
+
+    search bar pop up done
+
+[33mcommit 68af3589dc7655f65cddca841ad503d8360dac5d[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 13:03:38 2024 +0000
+
+    Added selling operations
+
+[33mcommit 6177aba426315441fa44f5e03f3f479c93c932d8[m
+Merge: edf6121 2ec1092
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Wed Aug 28 13:50:28 2024 +0100
+
+    Merge pull request #44 from LStanaszek/IE-86-Prepopulate-database
+    
+    Ie 86 prepopulate database
+
+[33mcommit 2ec1092bd6b57bc1d7ca1f4a1262d75319c9cd24[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 12:49:53 2024 +0000
+
+    Dummy data and sectors corrected
+
+[33mcommit 76d8b6eff780656e734ebcdf4ec4c4ef38b027cc[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 11:28:24 2024 +0000
+
+    Sector changes to match finnhub
+
+[33mcommit edf61211ee963b1329c7e9cb90b372f16c109b19[m
+Merge: c415974 0573c4f
+Author: MMI7865 <101802684+MMI7865@users.noreply.github.com>
+Date:   Wed Aug 28 12:20:49 2024 +0100
+
+    Merge pull request #43 from LStanaszek/IE-111
+    
+    buy-sell button up to dated
+
+[33mcommit 0573c4fa8a5f369443c25b7bac37bd4310e642cc[m
+Author: Peipei Chen <miachen0506@gmail.com>
+Date:   Wed Aug 28 11:18:45 2024 +0000
+
+    manually merged previous code
+
+[33mcommit c4159740fe0c55708ecd16db8a1b4ab9869fec19[m
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Wed Aug 28 11:59:22 2024 +0100
+
+    Add files via upload
+
+[33mcommit 1b874d9d1678594079d5950bd36491c1487fd529[m[33m ([m[1;31morigin/IE-111[m[33m)[m
+Author: Peipei Chen <miachen0506@gmail.com>
+Date:   Wed Aug 28 10:50:25 2024 +0000
+
+    buy-sell button up to dated
+
+[33mcommit 3ff2a318fa70470158135864c4fd724480d251f3[m
+Merge: 9c2c6fa 93adafc
+Author: MMI7865 <101802684+MMI7865@users.noreply.github.com>
+Date:   Wed Aug 28 11:42:08 2024 +0100
+
+    Merge pull request #42 from LStanaszek/IE-84-Updating-Historical-data-endpoint
+    
+    New endpoint /HistoricalDatesPrices to get stock prices for graph
+
+[33mcommit 93adafcc3f617a9c4afa515df625a88ebcdf9dfa[m[33m ([m[1;31morigin/IE-84-Updating-Historical-data-endpoint[m[33m)[m
+Author: User111 <test@gmail.com>
+Date:   Wed Aug 28 10:40:45 2024 +0000
+
+    New endpoint /HistoricalDatesPrices to get stock prices for graph
+
+[33mcommit 9c2c6fa8ccac0b61785803d32e7beeba8ce2427c[m
+Merge: c5332ff fab00f5
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Wed Aug 28 11:35:13 2024 +0100
+
+    Merge pull request #41 from LStanaszek/IE-85-Change-sellStocks-function-argument-stock_id-to-ticker
+    
+    sellstocks with ticker argument
+
+[33mcommit fab00f5826f5b5b707edc223815e5e2de72e91b1[m[33m ([m[1;31morigin/IE-85-Change-sellStocks-function-argument-stock_id-to-ticker[m[33m)[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 10:34:46 2024 +0000
+
+    sellstocks with ticker argument
+
+[33mcommit b159ff54e7bf84a937135105856f473972cf33b1[m
+Merge: a832627 c5332ff
+Author: majid-amjad <amjadmajid10@gmail.com>
+Date:   Wed Aug 28 11:34:19 2024 +0100
+
+    Merge remote-tracking branch 'origin/main' into IE-77-create-wallet-page
+
+[33mcommit a832627dded35d8ff03d508374ccda6e05b0885b[m
+Author: majid-amjad <amjadmajid10@gmail.com>
+Date:   Wed Aug 28 11:31:46 2024 +0100
+
+    added addFunds
+
+[33mcommit c5332ff265324ef994dcb6bc8ea1b4814c30e663[m
+Merge: 62d5643 3c4ad86
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 10:02:58 2024 +0000
+
+    Merge branch 'main' of https://github.com/LStanaszek/neuedaTraining
+
+[33mcommit 62d564364de8ba3d91a9db54723ef5197485b4cf[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 10:02:36 2024 +0000
+
+    parsefloat parseint
+
+[33mcommit 3c4ad86311d7865d931a1e063246b3aaed40a0b1[m
+Merge: 1643398 86d1b6f
+Author: MMI7865 <101802684+MMI7865@users.noreply.github.com>
+Date:   Wed Aug 28 10:52:50 2024 +0100
+
+    Merge pull request #40 from LStanaszek/IE-83-Autocomplete-with-yahoo-finance
+    
+    Ie 83 autocomplete with yahoo finance
+
+[33mcommit 86d1b6f02af69e9522c617cd2abcd20f94cea0ba[m[33m ([m[1;31morigin/IE-83-Autocomplete-with-yahoo-finance[m[33m)[m
+Merge: c117830 1643398
+Author: MMI7865 <101802684+MMI7865@users.noreply.github.com>
+Date:   Wed Aug 28 10:52:39 2024 +0100
+
+    Merge branch 'main' into IE-83-Autocomplete-with-yahoo-finance
+
+[33mcommit c11783019cb91019c7e49ae59965c57b2d54392b[m
+Author: User111 <test@gmail.com>
+Date:   Wed Aug 28 09:50:27 2024 +0000
+
+    Misch changes
+
+[33mcommit 088b348b556ab50fc5cce708430c1621ea528532[m
+Author: User111 <test@gmail.com>
+Date:   Wed Aug 28 09:41:19 2024 +0000
+
+    Formatted auto search dropdown list
+
+[33mcommit 1643398f37b7976e936b2b4736cd99fa08c5b83f[m
+Merge: eaa7677 dc98ebd
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Wed Aug 28 10:10:12 2024 +0100
+
+    Merge pull request #39 from LStanaszek/IE-82-Making-all-number-to-2-decimal-places
+    
+    2 Decimal places in StockInfoScript
+
+[33mcommit dc98ebd1fb3a7600c2548c58faefbeb3977beed7[m[33m ([m[1;31morigin/IE-82-Making-all-number-to-2-decimal-places[m[33m)[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Wed Aug 28 09:05:15 2024 +0000
+
+    2 Decimal places in StockInfoScript
+
+[33mcommit a1ce7e0cfa8065517452a6fd940ed213b69d1593[m
+Author: User111 <test@gmail.com>
+Date:   Tue Aug 27 22:44:09 2024 +0000
+
+    Added endpoint to get autocomplete with yahoo finance and updated search functionality
+
+[33mcommit eaa767771bb1cebdee668f0a1bdc0ed938520008[m
+Author: User111 <test@gmail.com>
+Date:   Tue Aug 27 21:29:55 2024 +0000
+
+    added changes to browse.html to deal with actual top gainer/loser data
+
+[33mcommit e9851579a5991bb85bcfbf3c6b95f6160cc86a1f[m
+Merge: 03dec91 6394af1
+Author: LStanaszek <97518209+LStanaszek@users.noreply.github.com>
+Date:   Tue Aug 27 20:11:54 2024 +0000
+
+    Merge pull request #38 from LStanaszek/IE-81-Get-shares-owned-with-ticker
+    
+    share amount api
+
+[33mcommit 6394af1c5bd6363673e3ea082006d3d3720bfb0f[m[33m ([m[1;31morigin/IE-81-Get-shares-owned-with-ticker[m[33m, [m[1;32mIE-81-Get-shares-owned-with-ticker[m[33m)[m
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Tue Aug 27 20:11:16 2024 +0000
+
+    share amount api
+
+[33mcommit 03dec91291c2676c27291d84afefe0be5def3ef9[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Tue Aug 27 16:43:33 2024 +0000
+
+    fix db changes
+
+[33mcommit 9262232e28e863a23e22c2229eb836d1f9e77862[m
+Merge: 3a7f430 c923c52
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Tue Aug 27 17:38:21 2024 +0100
+
+    Merge pull request #37 from LStanaszek/IE-79-Improve-Checkout-API
+    
+    Checkout improvements
+
+[33mcommit c923c52456665809e5b07232aab75b8c04cf3dcb[m[33m ([m[1;31morigin/IE-79-Improve-Checkout-API[m[33m)[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Tue Aug 27 16:34:40 2024 +0000
+
+    Checkout improvements
+
+[33mcommit 3a7f4309c2a3cde35083c9cc00ec606c6dc5751e[m
+Merge: e7077ec dd18984
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Tue Aug 27 16:20:59 2024 +0000
+
+    Merge branch 'main' of https://github.com/LStanaszek/neuedaTraining
+
+[33mcommit e7077ec21f628d3c6dfa683d297aa065e4ee8779[m
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Tue Aug 27 16:16:14 2024 +0000
+
+    sector pie done
+
+[33mcommit dd18984f78177cb6df769d8a6a3bd4c08dc81664[m[33m ([m[1;31morigin/IE-80-create-buy-sell-modal[m[33m, [m[1;32mIE-80-create-buy-sell-modal[m[33m)[m
+Merge: 41d8744 d3d0fa1
+Author: peipei376 <miachen0506@gmail.com>
+Date:   Tue Aug 27 16:01:51 2024 +0000
+
+    Merge pull request #35 from LStanaszek/IE-76version2-search-box-with-suggestions
+    
+    Ie 76version2 search box with suggestions
+
+[33mcommit d3d0fa1f456a73ff790b2926c3f91518aa265704[m[33m ([m[1;31morigin/IE-76version2-search-box-with-suggestions[m[33m)[m
+Author: Peipei Chen <miachen0506@gmail.com>
+Date:   Tue Aug 27 15:31:38 2024 +0000
+
+    watchlist-modal layout changed
+
+[33mcommit 7f80bbc4aaeea2b9f4f2788b8767c1855f3c3330[m
+Author: Peipei Chen <miachen0506@gmail.com>
+Date:   Tue Aug 27 14:46:33 2024 +0000
+
+    browse page done
+
+[33mcommit 41d874417bac59dbf01ca301a7558432ac403559[m
+Merge: e35b524 c4335d6
+Author: LStanaszek <97518209+LStanaszek@users.noreply.github.com>
+Date:   Tue Aug 27 14:29:50 2024 +0000
+
+    Merge pull request #34 from LStanaszek/IE-47-On-Load-GET-Grab-top-5-stocks-in-our-inventory-as-pie
+    
+    Ie 47 on load get grab top 5 stocks in our inventory as pie
+
+[33mcommit c4335d61c94547f042a826f9e2dcf47f3247de23[m[33m ([m[1;31morigin/IE-47-On-Load-GET-Grab-top-5-stocks-in-our-inventory-as-pie[m[33m)[m
+Merge: 4087498 e35b524
+Author: LStanaszek <97518209+LStanaszek@users.noreply.github.com>
+Date:   Tue Aug 27 14:29:41 2024 +0000
+
+    Merge branch 'main' into IE-47-On-Load-GET-Grab-top-5-stocks-in-our-inventory-as-pie
+
+[33mcommit 4087498972c860031fa25d370f970d2fc5700ba6[m[33m ([m[1;32mIE-47-On-Load-GET-Grab-top-5-stocks-in-our-inventory-as-pie[m[33m)[m
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Tue Aug 27 14:26:18 2024 +0000
+
+    stocks pie chart finished
+
+[33mcommit e35b5249913bdbb5f3950ad849cfd263f247418c[m
+Merge: 599e77e 2fd72f6
+Author: Jian-Hong Ye <94693619+jian27@users.noreply.github.com>
+Date:   Tue Aug 27 14:55:02 2024 +0100
+
+    Merge pull request #33 from LStanaszek/IE-51-On-Load-GET-freeFunds
+    
+    GET funds API
+
+[33mcommit 2fd72f67974363eb6cec28960770cd8874de9b7e[m[33m ([m[1;31morigin/IE-51-On-Load-GET-freeFunds[m[33m)[m
+Author: Jian-Hong <jiannnye@gmail.com>
+Date:   Tue Aug 27 13:53:46 2024 +0000
+
+    GET funds API
+
+[33mcommit fbf30b4e9ca07a6ce025c224a25051216e57c205[m
+Author: Lukasz Stanaszek <lstan2104@gmail.com>
+Date:   Tue Aug 27 13:44:16 2024 +0000
+
+    WIP pie chart stock
+
+[33mcommit 599e77e35f1cf268d928717d75c37766bc3eb853[m
+Author: majid-amjad <amjadmajid10@gmail.com>
+Date:   Tue Aug 27 14:18:28 2024 +0100
+
+    added cors to package-lock.json
+
+[33mcommit 87e4000c096ea6240c3213091ef74ad38515b1c3[m
+Merge: 84821a2 87f2912
+Author: majid-amjad <76595742+majid-amjad@users.noreply.github.com>
+Date:   Tue Aug 27 14:13:13 2024 +0100
+
+    Merge pull request #32 from LStanaszek/IE-78-link-main-graph-to-BE
+    
+    linked main portfolio graph to BE
+
+[33mcommit 87f2912623da8280ab7ab3db36bcefa6e4f8a12f[m[33m ([m[1;31morigin/IE-78-link-main-graph-to-BE[m[33m)[m
+Author: majid-amjad <amjadmajid10@gmail.com>
+Date:   Tue Aug 27 14:12:47 2024 +0100
+
+    linked main portfolio graph to BE
+
+[33mcommit 84821a2fd66af27d80e446a671159a28c6c7eac5[m[33m ([m[1;31morigin/IE-18-Create-Stock-Popup[m[33m)[m
+Author: User111 <test@gmail.com>
+Date:   Tue Aug 27 11:38:12 2024 +0000
+
+    Fixed issues with DB: Updated sequelize
