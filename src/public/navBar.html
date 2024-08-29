@@ -1,4 +1,5 @@
 <!--/src/public/navBar.html file-->
+<!--
 <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary border-bottom">
     <div class="container-fluid">
         <a class="navbar-brand" href="index.html" style="font-size:35px; font-weight:bold;">InvestEd</a>
@@ -25,46 +26,43 @@
         </div>
     </div>
 </nav>
+-->
 
+<!--/src/public/navBar.html file-->
+<nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary border-bottom">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="index.html" style="font-size:35px; font-weight:bold;">InvestEd</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="nav nav-pills me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="index.html">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">Analysis</a>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link btn addFundsButton">Add Funds</button>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn drawFundsButton">Withdraw</a>
+                </li>
+              </ul>
 
-<!-- <script>
-   async function fetchSearchSuggestions() {
-    const query = document.getElementById('searchBox').value;
+            <div class="card">
+                <div class="card-body text-center">
+                    <p class="card-text fs-6 fw-bold" id="freeCash">$0</p>
+                </div>
+            </div>
 
-    if (query.length < 2) {
-        document.getElementById('suggestionsList').style.display = 'none';
-        return;
-    }
+            <form class="d-flex position-relative ms-3" role="search" onsubmit="return showStockDetailFromSearch()">
+                <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" id="searchBox" oninput="fetchSearchSuggestions()">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+                <ul class="dropdown-menu position-absolute w-100" id="suggestionsList" style="display:none; z-index:1000;"></ul>
+            </form>
+        </div>
+    </div>
+</nav>
 
-    try {
-        const response = await fetch(`http://localhost:3000/SearchSuggestion/api/autocomplete?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-
-        const suggestions = data;
-        const suggestionsList = document.getElementById('suggestionsList');
-
-        suggestionsList.innerHTML = ''; // Clear previous suggestions
-
-        if (suggestions.length > 0) {
-            suggestions.forEach(suggestion => {
-                const li = document.createElement('li');
-                li.classList.add('dropdown-item');
-                li.innerHTML = `<strong>${suggestion.symbol}</strong> - ${suggestion.name}`;
-                li.onclick = () => {
-                    document.getElementById('searchBox').value = suggestion.symbol;
-                    document.getElementById('suggestionsList').style.display = 'none';
-                };
-                suggestionsList.appendChild(li);
-            });
-            suggestionsList.style.display = 'block';
-        } else {
-            suggestionsList.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Error fetching search suggestions:', error);
-        document.getElementById('suggestionsList').style.display = 'none';
-    }
-}
-
-    </script> -->
-    
